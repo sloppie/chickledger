@@ -9,7 +9,10 @@ import {
     Dimensions,
 } from 'react-native';
 
+import FileManager from '../../utilities/FileManager';
 import Theme from '../../theme/Theme';
+
+// !TODO add an instructional View at the end of the AddInventory Component to help the user fill in data correctly
 
 export default class AddInventory extends Component{
     constructor(props){
@@ -23,7 +26,7 @@ export default class AddInventory extends Component{
         console.log(context);
         return(
             <View>
-                {(context.toLowerCase() === "eggs")? <Eggs batchInformation={batchInformation}/>: <Feeds batchInformation={batchInformation}/>}
+                {(context.toLowerCase() === "eggs")? <Eggs batchInformation={batchInformation} navigation={navigation}/>: <Feeds batchInformation={batchInformation} navigation={navigation}/>}
             </View>
         );
     }
@@ -41,7 +44,7 @@ class Feeds extends Component{
 
     onInput = (value) => {
         this.setState({
-            number: value,
+            number: Number(value),
         });
     }
 
@@ -53,6 +56,12 @@ class Feeds extends Component{
         };
 
         return JSON.stringify(data, null, 2);
+    }
+
+    sendData = (data) => {
+        let { batchInformation } = this.props;
+        FileManager.addFeeds(batchInformation, data);
+        this.props.navigation.goBack();
     }
 
     alert = () => {
@@ -71,7 +80,7 @@ class Feeds extends Component{
                 {
                     text: "Confirm",
                     onPress: () => {
-                        console.log(data);
+                        this.sendData(data);
                     },
                 }
             ],
@@ -161,7 +170,7 @@ class Eggs extends Component{
             sum += data[key];
         }
 
-        console.log(sum)
+        console.log(sum);
         if(sum <= population)
             return JSON.stringify(data, null, 2);
         else{
@@ -183,6 +192,12 @@ class Eggs extends Component{
         );
     }
 
+    sendData(data){
+        let { batchInformation } = this.props;
+        FileManager.addEggs(batchInformation, data);
+        this.props.navigation.goBack();
+    }
+
     alert = () => {
         let finalData = this.formatData();
         if(finalData){
@@ -200,7 +215,7 @@ class Eggs extends Component{
                     {
                         text: "Confirm",
                         onPress: () => {
-                            console.log(finalData);
+                            this.sendData(finalData);
                         },
                         style: "default",
                     },
@@ -257,3 +272,63 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
     },   
 });
+
+
+
+/**
+ * ```js
+ *  let weekData = {
+ *      // week starts at monday
+ *    eggs: {
+ *      "monday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      },
+ *      "tuesday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      },
+ *      "wednesday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      },
+ *      "thursday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      },
+ *      "friday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      },
+ *      "saturday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      },
+ *      "sunday": {
+ *          normalEggs: 30.15,
+ *          brokenEggs: 0.40,
+ *          smallerEggs: 0.50,
+ *          largerEggs: 0.30          
+ *      }
+ *    },
+ *    feeds: {
+ *      "monday": 8,
+ *      "wednesday": 7,
+ *      "friday": 8,
+ *      "sunday": 8,
+ *    },  
+ *  };
+ * ```
+ */

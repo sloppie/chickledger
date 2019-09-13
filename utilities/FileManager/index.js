@@ -2,7 +2,10 @@ import { NativeModules } from 'react-native';
 
 // Date format = MM/DD/YY
 
-class FileManager {
+/**
+ * This class helps link the FileManager NativeModule to the react-native app
+ */
+export default class FileManager {
     constructor(batchInformation){
         this.batchInformation = batchInformation;
         this.context = this.batchInformation.name;
@@ -88,6 +91,89 @@ class FileManager {
             NativeModules.FileManager.addDay(batch.context, weekInfo[0]+1, data);
         }else{
             NativeModules.FileManager.addDay(batch.context, weekInfo[0], data);
+        }
+    }
+
+    static addEggs(batchInformation, data) {
+        let batch = new FileManager(batchInformation);
+        let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+        let currentDay = days[new Date().getDay()];
+        let weekInfo = batch.calculateWeek();
+        if (weekInfo[1]) {
+            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0] + 1), (stored)=>{
+                let newData;
+                if (stored) {
+                    newData = JSON.parse(stored);
+                    newData.eggs[currentDay] = data;
+                } else {
+                    newData = FileManager.createTemplate();
+                    newData.eggs[currentDay] = data;
+                }
+
+                newData = JSON.stringify(newData, null, 2);
+                console.log(newData);
+                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
+            });
+        } else {
+            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0]), (stored) => {
+                let newData;
+                if (stored) {
+                    newData = JSON.parse(stored);
+                    newData.eggs[currentDay] = data;
+                } else {
+                    newData = FileManager.createTemplate();
+                    newData.eggs[currentDay] - data;
+                }
+
+                newData = JSON.stringify(newData, null, 2);
+                console.log(newData);
+                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
+            });
+        }
+    }
+
+    static addFeeds(batchInformation, data){
+        let batch = new FileManager(batchInformation);
+        let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+        let currentDay = days[new Date().getDay()];
+        let weekInfo = batch.calculateWeek();
+        if (weekInfo[1]) {
+            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0] + 1), (stored)=>{
+                let newData;
+                if (stored) {
+                    newData = JSON.parse(stored);
+                    newData.feeds[currentDay] = data;
+                } else {
+                    newData = FileManager.createTemplate();
+                    newData.feeds[currentDay] = data;
+                }
+
+                newData = JSON.stringify(newData, null, 2);
+                console.log(newData);
+                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
+            });
+        } else {
+            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0]), (stored) => {
+                let newData;
+                if (stored) {
+                    newData = JSON.parse(stored);
+                    newData.feeds[currentDay] = data;
+                } else {
+                    newData = FileManager.createTemplate();
+                    newData.feeds[currentDay] - data;
+                }
+
+                newData = JSON.stringify(newData, null, 2);
+                console.log(newData);
+                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
+            });
+        }
+    }
+
+    static createTemplate(){
+        return {
+            eggs: {},
+            feeds: {},
         }
     }
 

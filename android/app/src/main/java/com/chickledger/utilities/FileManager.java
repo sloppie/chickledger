@@ -177,7 +177,6 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
       File week = new File(filesDir, "data/" + context + "/" + weekNumber);
       if (week.exists()) {
         writeFile(week, data);
-
         // !TODO refactor the callback to display a better message
         onSuccess.invoke("success");
       } else {
