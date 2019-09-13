@@ -1,4 +1,4 @@
-// import { NativeModules } from 'react-native';
+import { NativeModules } from 'react-native';
 
 // Date format = MM/DD/YY
 
@@ -80,18 +80,15 @@ class FileManager {
         console.log(`${weekNumber} weeks, ${offset%7}`);
         return [Math.floor(offset/7), offset%7];
     }
-}
 
-let batchInformation = {
-    name: "Patient Zero",
-    population: [
-        {
-            population: 1000,
-            date: new Date("9/12/2019").getTime()
+    static addWeek(batchInformation, data){
+        let batch = new FileManager(batchInformation);
+        let weekInfo = batch.calculateWeek();
+        if(weekInfo[1]){
+            NativeModules.FileManager.addDay(batch.context, weekInfo[0]+1, data);
+        }else{
+            NativeModules.FileManager.addDay(batch.context, weekInfo[0], data);
         }
-    ]
-};
-new FileManager(batchInformation).calculateWeek();
-module.exports = {
-    FileManager,
+    }
+
 }
