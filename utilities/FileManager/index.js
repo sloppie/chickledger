@@ -88,7 +88,7 @@ export default class FileManager {
         let batch = new FileManager(batchInformation);
         let weekInfo = batch.calculateWeek();
         if(weekInfo[1]){
-            NativeModules.FileManager.addDay(batch.context, weekInfo[0]+1, data);
+            NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), data);
         }else{
             NativeModules.FileManager.addDay(batch.context, weekInfo[0], data);
         }

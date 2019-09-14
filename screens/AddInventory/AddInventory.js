@@ -111,78 +111,106 @@ class Eggs extends Component{
         super(props);
 
         this.state = {
-            normalEggs: 0,
-            brokenEggs: 0,
-            smallerEggs: 0,
-            largerEggs: 0,
+            normalEggs: "0.0",
+            brokenEggs: "0.0",
+            smallerEggs: "0.0",
+            largerEggs: "0.0",
         };
     }
 
     NEChange = (value) => {
         this.setState({
-            normalEggs: Number(value),
+            normalEggs: value,
         });
     }
 
     BEChange = (value) => {
         this.setState({
-            brokenEggs: Number(value),
+            brokenEggs: value,
         });
     }
 
     SEChange = (value) => {
         this.setState({
-            smallerEggs: Number(value),
+            smallerEggs: value,
         });
     }
 
     LEChange = (value) => {
         this.setState({
-            largerEggs: Number(value),
+            largerEggs: value,
         });
+    }
+
+    formValidation = () => {
+        let data = this.state;
+        let validatedData = {};
+        let globalSum = 0;
+        for(let key in data){
+            let inputData = data[key];
+            let splitData = inputData.split(".");
+            inputData = splitData;
+            inputData[0] = (Number(inputData[0]) * 30);
+            if(inputData[1] > 29) {
+                let title = "Invalid Data";
+                let message = `The data entered for eggs is invalid\n${splitData.join(".")}; value ${splitData[1]} could fill a tray\nSolution:\n\nTry: ${key} = ${Number(splitData[0]) + Math.floor(Number(splitData[1])/30)}.${Number(splitData[1])%30}`;
+                this.reenterValues(title, message);
+                return null;
+            }
+            let sum = inputData[0] + Number(inputData[1]);
+            globalSum += sum;
+            validatedData[key] = sum;
+        }
+
+        return validatedData;
     }
 
     formatData = () => {
         let { batchInformation } = this.props;
         console.log(`This is batch information from AI:\n${batchInformation}`)
         let { population } = batchInformation.population[0];
-        console.log(population);
-
-        let {
-            normalEggs,
-            brokenEggs,
-            largerEggs,
-            smallerEggs
-        } = this.state;
-
-        let data = {
-            normalEggs,
-            brokenEggs,
-            largerEggs,
-            smallerEggs
-        };
-
-        console.log(JSON.stringify(data, null, 2));
-
-        var sum = 0;
-        for (let key in data) {
-            console.log(data[key]);
-            sum += data[key];
-        }
-
-        console.log(sum);
-        if(sum <= population)
-            return JSON.stringify(data, null, 2);
-        else{
-            this.reenterValues(sum);
-            return null;
+        if (this.formValidation()){
+            console.log(this.formValidation());
+    
+            let {
+                normalEggs,
+                brokenEggs,
+                largerEggs,
+                smallerEggs
+            } = this.formValidation();
+    
+            let data = {
+                normalEggs,
+                brokenEggs,
+                largerEggs,
+                smallerEggs
+            };
+    
+            console.log("Egg Number below");
+            console.log(JSON.stringify(data, null, 2));
+    
+            var sum = 0;
+            for (let key in data) {
+                console.log(data[key]);
+                sum += data[key];
+            }
+    
+            console.log(sum);
+            if(sum <= population)
+                return JSON.stringify(data, null, 2);
+            else{
+                let title = "Too many eggs";
+                let message = "The values you entered add up to an excess value of eggs: " + sum + "eggs.\n\nConsider revising the values "
+                this.reenterValues(title, message);
+                return null;
+            }
         }
     }
 
-    reenterValues(sum){
+    reenterValues(title, message){
         Alert.alert(
-            "Too Many Eggs",
-            `The total number of eggs entered: ${sum} exceed the population of the chicken`,
+            title,
+            message,
             [
                 {
                     text: "Revise Values",
@@ -194,16 +222,17 @@ class Eggs extends Component{
 
     sendData(data){
         let { batchInformation } = this.props;
-        FileManager.addEggs(batchInformation, data);
+        // FileManager.addEggs(batchInformation, data);
         this.props.navigation.goBack();
     }
 
     alert = () => {
+        this.formValidation();
         let finalData = this.formatData();
         if(finalData){
             Alert.alert(
                 "Confirm Submission",
-                `Normal Eggs: ${this.state.normalEggs}\nBroken Eggs: ${this.state.brokenEggs}\nLarger Eggs: ${this.state.largerEggs}\nSmaller Eggs: ${this.state.smallerEggs}`,
+                `Normal Eggs: ${this.state.normalEggs.split(".")[0]} trays, ${this.state.normalEggs.split(".")[1]} eggs\nBroken Eggs: ${this.state.brokenEggs.split(".")[0]} trays, ${this.state.brokenEggs.split(".")[1]} eggs\nLarger Eggs: ${this.state.largerEggs.split(".")[0]} trays, ${this.state.largerEggs.split(".")[1]} eggs\nSmaller Eggs: ${this.state.smallerEggs.split(".")[0]} trays, ${this.state.smallerEggs.split(".")[1]} eggs`,
                 [
                     {
                         text: "Cancel",
