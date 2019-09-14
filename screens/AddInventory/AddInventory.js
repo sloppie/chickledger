@@ -9,6 +9,8 @@ import {
     Dimensions,
 } from 'react-native';
 
+import Icon from 'react-native-ionicons';
+
 import FileManager from '../../utilities/FileManager';
 import Theme from '../../theme/Theme';
 
@@ -17,6 +19,35 @@ import Theme from '../../theme/Theme';
 export default class AddInventory extends Component{
     constructor(props){
         super(props);
+        this.state = {
+            exists: false,
+        };
+        this._isMounted = false;
+    }
+
+    componentDidMount(){
+        this._isMounted = true;
+        let context = this.props.navigation.getParam('context', 'eggs');
+        let batchInformation = this.props.navigation.getParam('batchInformation', null)
+        this.setState({
+            exists: this._isMounted && FileManager.checkForRecords(batchInformation, context.toLowerCase())
+        });
+    }
+
+    renderPage = (context, batchInformation, navigation) => {
+        if (this.state.exists) {
+            return (
+                <View style={styles.page}>
+                    <Icon style={{textAlign: "center"}} name="lock"/>
+                </View>
+            )
+        } else {
+            return (
+                <View style={styles.page}>
+                    {(context.toLowerCase() === "eggs") ? <Eggs batchInformation={batchInformation} navigation={navigation} /> : <Feeds batchInformation={batchInformation} navigation={navigation} />}
+                </View>
+            );
+        }
     }
 
     render(){
@@ -24,10 +55,8 @@ export default class AddInventory extends Component{
         const batchInformation = navigation.getParam("batchInformation", {});
         let context = navigation.getParam("context", "Not Founnd");
         console.log(context);
-        return(
-            <View>
-                {(context.toLowerCase() === "eggs")? <Eggs batchInformation={batchInformation} navigation={navigation}/>: <Feeds batchInformation={batchInformation} navigation={navigation}/>}
-            </View>
+        return (
+            this.renderPage(context, batchInformation, navigation)
         );
     }
 }
@@ -40,7 +69,9 @@ class Feeds extends Component{
             number: 0,
             date: new Date().toLocaleDateString(),
         };
+
     }
+
 
     onInput = (value) => {
         this.setState({
@@ -292,6 +323,11 @@ class Eggs extends Component{
 }
 
 const styles = StyleSheet.create({
+    page: {
+        minHeight: Dimensions.get("window").height,
+        alignContent: "center",
+        justifyContent: "center",
+    },
     eggs: {
         borderBottomColor: Theme.PRIMARY_COLOR_DARK,
         borderBottomWidth: 2,

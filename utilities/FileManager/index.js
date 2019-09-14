@@ -20,13 +20,13 @@ export default class FileManager {
         this.initialMonth = this.dateObj.getMonth();
         
         this.days = [
+            "sunday",
             "monday",
             "tuesday",
             "wednesday",
             "thursday",
             "friday",
-            "saturday",
-            "sunday"
+            "saturday"
         ];
         let current = new Date();
         this.months = [
@@ -66,11 +66,11 @@ export default class FileManager {
                 let days = (((y == this.currentYear && m==this.currentMonth))? this.currentDate: this.months[m][1]);
                 let initial = (y== this.initialYear && m==this.initialMonth)? this.initialDate: 1;
                 for(let d=initial; d<=days; d++){
-                    if(this.days[currentDay] == "sunday"){
-                        currentDay = 0;
-                    }else{
-                        currentDay++;
-                    }
+                    // if(this.days[currentDay] == "sunday"){
+                    //     currentDay = 0;
+                    // }else{
+                    //     currentDay++;
+                    // }
                     offset++;
 
                     if(!(offset % 7)){
@@ -168,6 +168,31 @@ export default class FileManager {
                 NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
             });
         }
+    }
+
+    static checkForRecords(batchInformation, type){
+        console.log(type);
+        let isMounted = true;
+        let batch = new FileManager(batchInformation);
+        let weeks = batch.calculateWeek();
+        let answer = false;
+        if (weeks[1]) {
+            let response = NativeModules.FileManager.fetchWeeker(batch.context, (weeks[0] + 1));
+            if (response) {
+                let parsed = JSON.parse(response);
+                answer = (parsed[type][batch.days[batch.currentDay]] != null);
+            }
+            
+        } else {
+            let response = NativeModules.FileManager.fetchWeeker(batch.context, weeks[0]);
+            if (response) {
+                let parsed = JSON.parse(response);
+                answer = (parsed[type][batch.days[batch.currentDay]] != null);
+            }
+        }
+
+        console.log("This is an answer " + answer);
+        return answer;
     }
 
     static createTemplate(){

@@ -156,6 +156,13 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
     sendData.invoke(readFile(week));
   }
 
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public String fetchWeeker(String context, int weekNumber){
+    File week = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
+
+    return readFile(week);
+  }
+
   @ReactMethod
   public void fetchBatch(String context, Callback onError) {
     if (DirectoryCheck.checkDirectory(filesDir, context)) {

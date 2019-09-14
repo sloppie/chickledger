@@ -7,6 +7,7 @@ import Icon from 'react-native-ionicons';
 
 /* Theme colors */
 import Theme from '../../../theme/Theme';
+import FileManager from '../../../utilities/FileManager';
 
 export default class FloatingActionButton extends Component {
   constructor(props) {
