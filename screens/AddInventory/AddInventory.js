@@ -37,13 +37,13 @@ export default class AddInventory extends Component{
     renderPage = (context, batchInformation, navigation) => {
         if (this.state.exists) {
             return (
-                <View style={styles.page}>
+                <View style={styles.lockedPage}>
                     <Icon style={{textAlign: "center"}} name="lock"/>
                 </View>
             )
         } else {
             return (
-                <View style={styles.page}>
+                <View >
                     {(context.toLowerCase() === "eggs") ? <Eggs batchInformation={batchInformation} navigation={navigation} /> : <Feeds batchInformation={batchInformation} navigation={navigation} />}
                 </View>
             );
@@ -253,7 +253,7 @@ class Eggs extends Component{
 
     sendData(data){
         let { batchInformation } = this.props;
-        // FileManager.addEggs(batchInformation, data);
+        FileManager.addEggs(batchInformation, data);
         this.props.navigation.goBack();
     }
 
@@ -323,7 +323,7 @@ class Eggs extends Component{
 }
 
 const styles = StyleSheet.create({
-    page: {
+    lockedPage: {
         minHeight: Dimensions.get("window").height,
         alignContent: "center",
         justifyContent: "center",
