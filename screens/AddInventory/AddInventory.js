@@ -6,6 +6,7 @@ import {
     Alert,
     StyleSheet,
     Button,
+    TouchableHighlight,
     Dimensions,
 } from 'react-native';
 
@@ -34,11 +35,21 @@ export default class AddInventory extends Component{
         });
     }
 
+    displayForm = () => {
+        this.setState({
+            exists: false,
+        });
+    }
     renderPage = (context, batchInformation, navigation) => {
         if (this.state.exists) {
             return (
                 <View style={styles.lockedPage}>
-                    <Icon style={{textAlign: "center"}} name="lock"/>
+                    <TouchableHighlight
+                        onPress={this.displayForm}
+                    >
+                        <Icon style={{textAlign: "center"}} name="lock" size={45}/>
+                    </TouchableHighlight>
+                    <Text style={styles.info}>{`This icon appears because you already input data for today\nIf you would like to reenter the data, please press the lock icon`}</Text>
                 </View>
             )
         } else {
@@ -327,6 +338,11 @@ const styles = StyleSheet.create({
         minHeight: Dimensions.get("window").height,
         alignContent: "center",
         justifyContent: "center",
+    },
+    info: {
+        textAlign: "center",
+        color: Theme.HEADER_COLOR,
+        fontWeight: Theme.NORMAL_WEIGHT,
     },
     eggs: {
         borderBottomColor: Theme.PRIMARY_COLOR_DARK,
