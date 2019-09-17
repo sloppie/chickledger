@@ -28,7 +28,7 @@ public class ThreadRunner implements Runnable{
 		// creating the map to be passed onto the EventEmitter
 		WritableMap fileDetails = Arguments.createMap();
 		// fileDetails.putString(file.getName(), readFile(file));
-		fileDetails.putString(file.getName(), readFile(file));
+		fileDetails.putString("" + file.getName() + "", readFile(file));
 		
 		// event send with data
 		sendFile(reactContext, "readFile", fileDetails);

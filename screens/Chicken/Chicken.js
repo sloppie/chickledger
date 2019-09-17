@@ -17,6 +17,9 @@ import { LineChart } from 'react-native-chart-kit';
 import Theme from '../../theme/Theme';
 import FloatingActionButton from './Fragments/FloatingActionButton';
 
+import FileManager from "./../../utilities/FileManager";
+
+const BinaryTree = require("./../../utilities/DataStructures/BinarySearchTrees").BinarySearchTree;
 /**
  * !TODO: Redefine the heights from line: 203
  * !TODO export the components to a single file in the Fragments
@@ -63,14 +66,14 @@ let EWCStyles = StyleSheet.create({
  * 
  * This Component displays Eggs produce per day and is grouped with weeks
  * `this.props.weekNumber` contains the week's object
- * ```
+ * ```js
  *  this.props.weekNumber = {
  *    weekNumber: Number,
  *    MON: {
  *      normalEggs: Number,
  *      brokenEggs: Number,
- *      largeEggs: Number,
- *      smallEggs: Number,
+ *      largerEggs: Number,
+ *      smallerEggs: Number,
  *    },
  *    ...
  *    // Goes on the same for all other days of the week
@@ -242,6 +245,21 @@ class FeedCard extends Component {
     });
   }
 
+  renderDays = () => {
+    let {week} = this.props;
+    let renderedWeek = [];
+    for(let day in week) {
+      renderedWeek.push(
+        <View style={FCStyles.day}>
+          <Text style={FCStyles.dayText}>{`${day}: ${week[day]}`}</Text>
+          <Icon style={FCStyles.editIcon} name="create" />
+        </View>
+      );
+    }
+
+    return renderedWeek;
+  }
+
   render() {
     return (
       <View style={FCStyles.card}>
@@ -251,29 +269,13 @@ class FeedCard extends Component {
         >
           <View style={{ flexDirection: "row" }}>
             <View style={FCStyles.cardInfo}>
-              <Text style={FCStyles.title}>WEEK {Math.round(Math.random() * 52)}</Text>
+              <Text style={FCStyles.title}>WEEK {this.props.week.weekNumber}</Text>
               <Text style={FCStyles.subtitle}>Total Feeds Consumed: {30}</Text>
             </View>
             <Icon name={this.state.expanded ? "arrow-dropup-circle" : "arrow-dropdown-circle"} style={FCStyles.icon} />
           </View>
         </TouchableHighlight>
-
-        <View style={{
-          display: this.state.expanded ? "flex" : "none",
-        }}>
-          <View style={FCStyles.day}>
-            <Text style={FCStyles.dayText}>TUE{" 7"}</Text>
-            <Icon style={FCStyles.editIcon} name="create" />
-          </View>
-          <View style={FCStyles.day}>
-            <Text style={FCStyles.dayText}>TUE{" 7"}</Text>
-            <Icon style={FCStyles.editIcon} name="create" />
-          </View>
-          <View style={FCStyles.day}>
-            <Text style={FCStyles.dayText}>TUE{" 7"}</Text>
-            <Icon style={FCStyles.editIcon} name="create" />
-          </View>
-        </View>
+        {this.renderDays()}
       </View>
     );
   }
@@ -339,38 +341,81 @@ export default class Chicken extends Component {
     this.state = {
       activeTab: [true, false, false],
       context: 0,
+      eggs: null,
+      feeds: null,
+      casualties: null,
+      now: 0,
     };
 
+    let batchInformation = this.props.navigation.getParam("batchInformation", {});
+    let length = new FileManager(batchInformation).calculateWeek();
+    this.length = (length[1])? (length[0] + 1): length[0];
+
   }
 
-  componentWillMount() {
-    // DeviceEventEmitter.addListener("sendFile", this.updateState);
-
-    // NativeModules.FileManager.fetchBatch("batchOne", (err)=>{
-    // 	if(err){
-    // 		console.log(err);
-    // 	}else{
-    // 		console.log("No error found from fetching");
-    // 	}
-    // });
+  componentWillMount(){
+    let batchInformation = this.props.navigation.getParam("batchInformation", {});
+    console.log((batchInformation)?"batchInfo exists": "batchInfo not found");
+    NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
+      console.log(error);
+    });
+    this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
   }
 
-  /**
-   * 
-   * @param {Object} data data to be written to the batch
-   */
-  write(data) { }
+  componentDidMount() {
 
-  /**
-   * 
-   * @param {Number} weekNumber contains the week number to be altered
-   * @param {Object} data contains the data to be added
-   * 
-   */
-  writeWeek(weekNumber, data) { }
+  }
+
+  componentWillUnmount(){
+    this.subscription.remove();
+  }
 
   updateState = (data) => {
-    console.log(data.file);
+    let key = Object.keys(data)[0];
+    if(key.toLowerCase() == 'brief') return;
+    let number = Number(key);
+    let refined = JSON.parse(data[key])
+    let {eggs, feeds, casualties} = refined;
+    eggs.weekNumber = number;
+    feeds.weekNumber = number;
+    casualties.weekNumber = number;
+
+    if(!this.state.eggs) {
+      this.setState({
+        eggs: new BinaryTree(eggs),
+        feeds: new BinaryTree(feeds),
+        casualties: new BinaryTree(casualties)
+      });
+    } else {
+      this.state.eggs.add(eggs);
+      this.state.feeds.add(feeds);
+      this.state.casualties.add(casualties);
+    }
+    // console.log(Object.keys(refined.data));
+    this.setState({
+      now: this.state.now + 1
+    });
+
+    if(this.length == this.state.now) {
+      for(let i=0; i<3; i++) {
+        let ctxt = (i==1)? "eggs":(1==2)? "feeds": "casualties";
+        let answer = [];
+        this.state[ctxt].visit(answer);
+        if(ctx == "eggs"){
+          this.setState({
+            eggs: answer
+          })
+        } if(ctx == "feeds"){
+          this.setState({
+            feeds: answer
+          })
+        } else{
+          this.setState({
+            casualties: answer
+          })
+        }
+      }
+    }
   }
 
   switchToTab = (index) => {
@@ -401,13 +446,13 @@ export default class Chicken extends Component {
     else if (index == 1)
       return (
         <View>
-          <ProduceTab batchInformation={batchInformation} />
+          <ProduceTab batchInformation={batchInformation} data={this.state.eggs}/>
         </View>
       );
     else
       return (
         <View>
-          <FeedsTab batchInformation={batchInformation} />
+          <FeedsTab batchInformation={batchInformation} data={this.state.feeds}/>
         </View>
       );
   }
@@ -441,6 +486,16 @@ export default class Chicken extends Component {
 }
 
 class FeedsTab extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  renderWeeks = () => {
+    let weeks = [];
+    for(let w=0; w<this.props.data.length; w++) {
+      weeks.push(<FeedCard week={this.props.data[w]}/>);
+    }
+  }
   render() {
     return (
       <View>
@@ -450,18 +505,7 @@ class FeedsTab extends Component {
             // display: this.state.activeTab[2]? "flex": "none",
           }}
         >
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
+          {this.renderWeeks()}
         </ScrollView>
       </View>
     );
@@ -521,6 +565,9 @@ class ChickenTab extends Component {
 }
 
 class ProduceTab extends Component {
+  constructor(props) {
+    super(props);
+  }
   render() {
     return (
       <View>
@@ -529,18 +576,7 @@ class ProduceTab extends Component {
             maxHeight: Dimensions.get("window").height - 150,
             // display: this.state.activeTab[1]? "flex": "none"
           }}>
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
-          <WeeklyCard />
+
         </ScrollView>
 
       </View>

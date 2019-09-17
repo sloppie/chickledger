@@ -9,7 +9,7 @@
  */
 
 class BinarySearchTree {
-	constructor(head){
+	constructor(head: Object){
 		this.head = new Node(head);
 	}
 

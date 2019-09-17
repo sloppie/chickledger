@@ -22,7 +22,7 @@ public class DirectoryCheck{
      * @return a boolean to show of the findings made
      */
     public static boolean checkDirectory(File context, String dirname){
-        return new File("data/" + dirname).exists(); 
+        return new File(context, "data/" + dirname).exists(); 
     }
 
     /**
