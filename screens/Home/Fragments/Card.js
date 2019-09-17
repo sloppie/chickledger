@@ -19,6 +19,7 @@ export default class Card extends Component{
 
   render(){
     let { batchInformation } = this.props;
+    let len = batchInformation.population.length - 1;
     return(
       <TouchableHighlight
         onPress={()=>this.props.navigation.navigate("Chicken", { batchInformation })}
@@ -28,7 +29,7 @@ export default class Card extends Component{
         <View>
           <View style={styles.titleHolder}>
             <Text style={styles.name}> {this.props.batchInformation.name}</Text>
-            <Text style={styles.weekTitle}>{`Week 76, from ${new Date(this.props.batchInformation.population[0].date).toLocaleDateString()}`}</Text> 
+            <Text style={styles.weekTitle}>{`Week 76, from ${new Date(this.props.batchInformation.population[len].date).toLocaleDateString()}`}</Text> 
           </View>
           <View
             style={{
