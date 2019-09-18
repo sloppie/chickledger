@@ -80,7 +80,7 @@ export default class FileManager {
             } //month loop
         } //year loop
 
-        console.log(`${weekNumber} weeks, ${offset%7}`);
+        // console.log(`${weekNumber} weeks, ${offset%7}`);
         return [Math.floor(offset/7), offset%7];
     }
 
@@ -111,7 +111,7 @@ export default class FileManager {
                 }
 
                 newData = JSON.stringify(newData, null, 2);
-                console.log(newData);
+                // console.log(newData);
                 NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
             });
         } else {
@@ -126,7 +126,7 @@ export default class FileManager {
                 }
 
                 newData = JSON.stringify(newData, null, 2);
-                console.log(newData);
+                // console.log(newData);
                 NativeModules.FileManager.addDay(batch.context, (weekInfo[0]), newData);
             });
         }
@@ -149,7 +149,7 @@ export default class FileManager {
                 }
 
                 newData = JSON.stringify(newData, null, 2);
-                console.log(newData);
+                // console.log(newData);
                 NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
             });
         } else {
@@ -164,7 +164,7 @@ export default class FileManager {
                 }
 
                 newData = JSON.stringify(newData, null, 2);
-                console.log(newData);
+                // console.log(newData);
                 NativeModules.FileManager.addDay(batch.context, (weekInfo[0]), newData);
             });
         }

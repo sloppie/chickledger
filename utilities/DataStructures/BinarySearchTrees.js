@@ -50,7 +50,7 @@ class Node {
 			this.left.visit(store)
 		}
 
-		store.push(this.data.weekNumber);
+		store.push(this.data);
 
 		if(this.right != null){
 			this.right.visit(store);

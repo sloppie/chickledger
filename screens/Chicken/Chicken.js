@@ -239,6 +239,10 @@ class FeedCard extends Component {
     };
   }
 
+  componentWillMount() {
+    this.renderedDays = this.renderDays();
+  }
+
   expand = () => {
     this.setState({
       expanded: !this.state.expanded,
@@ -250,8 +254,8 @@ class FeedCard extends Component {
     let renderedWeek = [];
     for(let day in week) {
       renderedWeek.push(
-        <View style={FCStyles.day}>
-          <Text style={FCStyles.dayText}>{`${day}: ${week[day]}`}</Text>
+        <View style={FCStyles.day} key={day}>
+          <Text style={FCStyles.dayText}>{`${day}: ${week[day].number}`}</Text>
           <Icon style={FCStyles.editIcon} name="create" />
         </View>
       );
@@ -275,7 +279,7 @@ class FeedCard extends Component {
             <Icon name={this.state.expanded ? "arrow-dropup-circle" : "arrow-dropdown-circle"} style={FCStyles.icon} />
           </View>
         </TouchableHighlight>
-        {this.renderDays()}
+        {(this.state.expanded)?this.renderedDays:<View/>}
       </View>
     );
   }
@@ -346,6 +350,7 @@ export default class Chicken extends Component {
       casualties: null,
       now: 0,
     };
+    this.now = 0;
 
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
     let length = new FileManager(batchInformation).calculateWeek();
@@ -355,11 +360,14 @@ export default class Chicken extends Component {
 
   componentWillMount(){
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
-    console.log((batchInformation)?"batchInfo exists": "batchInfo not found");
+    // console.log((batchInformation)?"batchInfo exists": "batchInfo not found");
     NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
-      console.log(error);
+      if(error){
+        console.log(error);
+      }
     });
     this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
+    // this.tab = this.renderTab();
   }
 
   componentDidMount() {
@@ -368,6 +376,10 @@ export default class Chicken extends Component {
 
   componentWillUnmount(){
     this.subscription.remove();
+  }
+
+  componentWillUpdate() {
+    // this.tab = this.renderTab();
   }
 
   updateState = (data) => {
@@ -386,34 +398,37 @@ export default class Chicken extends Component {
         feeds: new BinaryTree(feeds),
         casualties: new BinaryTree(casualties)
       });
-    } else {
+    } else if(this.state.eggs instanceof BinaryTree){
       this.state.eggs.add(eggs);
       this.state.feeds.add(feeds);
       this.state.casualties.add(casualties);
+    } else {
+      return;
     }
     // console.log(Object.keys(refined.data));
-    this.setState({
-      now: this.state.now + 1
-    });
+    this.now += 1;
 
-    if(this.length == this.state.now) {
+    if(this.length == this.now) {
       for(let i=0; i<3; i++) {
-        let ctxt = (i==1)? "eggs":(1==2)? "feeds": "casualties";
+        let ctxt = (i==0)? "eggs":(i==1)? "feeds": "casualties";
         let answer = [];
-        this.state[ctxt].visit(answer);
-        if(ctx == "eggs"){
+        if(ctxt == "eggs"){
+          this.state.eggs.visit(answer);
           this.setState({
-            eggs: answer
+            eggs: answer.reverse()
           })
-        } if(ctx == "feeds"){
+        }else if(ctxt == "feeds"){
+          this.state.feeds.visit(answer);
           this.setState({
-            feeds: answer
+            feeds: answer.reverse()
           })
         } else{
+          this.state.casualties.visit(answer);
           this.setState({
-            casualties: answer
+            casualties: answer.reverse()
           })
         }
+        // console.log(answer);
       }
     }
   }
@@ -430,7 +445,9 @@ export default class Chicken extends Component {
       activeTab,
       context: index,
     });
+    // this.tab = this.renderTab();
   }
+
 
   fetchData() {
 
@@ -459,6 +476,7 @@ export default class Chicken extends Component {
 
   render() {
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
+    let tab = this.renderTab();
     return (
       <View style={styles.chickenNav}>
         <View style={styles.header}></View>
@@ -468,7 +486,7 @@ export default class Chicken extends Component {
           {(this.state.activeTab[2]) ? <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 2)} style={styles.activeTab}><Text style={styles.tabText}>FEEDS</Text></TouchableHighlight> : <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 2)} style={styles.dormantTab}><Text style={styles.tabText}>FEEDS</Text></TouchableHighlight>}
         </View>
 
-        {this.renderTab()}
+        {tab}
 
         <View style={{
           position: "absolute",
@@ -490,13 +508,19 @@ class FeedsTab extends Component {
     super(props);
   }
 
+  componentWillMount(){
+    this.view = this.renderWeeks();
+  }
+
   renderWeeks = () => {
     let weeks = [];
     for(let w=0; w<this.props.data.length; w++) {
-      weeks.push(<FeedCard week={this.props.data[w]}/>);
+      weeks.push(<FeedCard week={this.props.data[w]} key={w}/>);
     }
+    return weeks;
   }
   render() {
+    // let view = this.renderWeeks();
     return (
       <View>
         <ScrollView
@@ -505,7 +529,7 @@ class FeedsTab extends Component {
             // display: this.state.activeTab[2]? "flex": "none",
           }}
         >
-          {this.renderWeeks()}
+          {this.view}
         </ScrollView>
       </View>
     );
