@@ -13,7 +13,7 @@ import Card from './Fragments/Card';
 import Theme from './../../theme/Theme';
 
 
-export default class Home extends Component{
+export default class Home extends React.PureComponent{
   constructor(props){
     super(props);
     this._isMounted = false;
@@ -93,9 +93,10 @@ export default class Home extends Component{
   }
 
   render(){
+    let renderedCards = this.renderCards();
     return(
       <View style={styles.home}>
-        {this.renderCards()}
+        {renderedCards}
         <View style={styles.FAB}>
           <FAB navigation={this.props.navigation}/>
         </View>
