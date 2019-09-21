@@ -3,6 +3,7 @@ package com.chickledger;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactnativecommunity.viewpager.RNCViewPagerPackage;
 import com.swmansion.rnscreens.RNScreensPackage;
 import com.horcrux.svg.SvgPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
@@ -29,6 +30,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNCViewPagerPackage(),
             new RNScreensPackage(),
             new SvgPackage(),
             new RNDeviceInfo(),

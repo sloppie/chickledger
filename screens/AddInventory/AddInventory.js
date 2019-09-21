@@ -14,6 +14,7 @@ import Icon from 'react-native-ionicons';
 
 import FileManager from '../../utilities/FileManager';
 import Theme from '../../theme/Theme';
+import { throwStatement } from '@babel/types';
 
 // !TODO add an instructional View at the end of the AddInventory Component to help the user fill in data correctly
 
@@ -53,11 +54,25 @@ export default class AddInventory extends Component{
                 </View>
             )
         } else {
-            return (
-                <View >
-                    {(context.toLowerCase() === "eggs") ? <Eggs batchInformation={batchInformation} navigation={navigation} /> : <Feeds batchInformation={batchInformation} navigation={navigation} />}
-                </View>
-            );
+            let page = context.toLowerCase();
+            if(page == "eggs")
+                return (
+                    <View>
+                        <Eggs batchInformation={batchInformation} navigation={navigation} />
+                    </View>
+                );
+            else if(page == "feeds")
+                return (
+                    <View>
+                        <Feeds batchInformation={batchInformation} navigation={navigation} />
+                    </View>
+                );
+            else
+                return (
+                    <View>
+                        <Casualties batchInformation={batchInformation} navigation={navigation} />
+                    </View>
+                );
         }
     }
 
@@ -82,7 +97,6 @@ class Feeds extends Component{
         };
 
     }
-
 
     onInput = (value) => {
         this.setState({
@@ -353,6 +367,87 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
     },   
 });
+
+class Casualties extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            date: new Date().toLocaleDateString(),
+            number: 0,
+            description: "",
+        };
+    }
+
+    handleChange = (value) => {
+        this.setState({
+            number: Number(value)
+        });
+    }
+
+    handleDesc = (value) => {
+        this.setState({
+            description: value
+        });
+    }
+
+    formatData = () => {
+        let {date, number, description} = this.state;
+
+        let finalData = {
+            date,
+            number,
+            description
+        };
+
+        let popo = this.props.batchInformation.population[0].population;
+
+        Alert.alert(
+            `Confirm casualty count`,
+            `The number of chicken dead is: ${date}\nReason being: ${description}\nNew Population: ${popo - number}`,
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => {
+                        console.log(`useropted to cancel`);
+                    },
+                    style: "cancel"
+                },
+                {
+                    text: "Confirm",
+                    onPress: () => {
+                        console.log(JSON.stringify(finalData, null, 2));
+                        this.props.navigation.goBack();
+                    },
+                    style: "default"
+                }
+            ],
+            {cancelable: false}
+        );
+    }
+
+    render() {
+        return (
+            <View>
+                <Text>{this.state.date}</Text>
+                <Text>Number: </Text>
+                <TextInput 
+                    onChangeText={this.handleChange}
+                    style={styles.textInput}
+                    keyboardType="numeric"
+                />
+                <Text>Cause of death:</Text>
+                <TextInput 
+                    onChangeText={this.handleDesc}
+                    style={styles.textInput}
+                />
+                <Button 
+                    title="submit"
+                    onPress={this.formatData}
+                />
+            </View>
+        );
+    }
+}
 
 
 

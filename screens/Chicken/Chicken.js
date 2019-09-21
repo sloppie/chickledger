@@ -10,7 +10,7 @@ import {
   NativeModules,
   DeviceEventEmitter,
 } from 'react-native';
-
+import ViewPager from '@react-native-community/viewpager';
 
 import Theme from '../../theme/Theme';
 
@@ -39,6 +39,7 @@ const BinaryTree = require("./../../utilities/DataStructures/BinarySearchTrees")
  * @method
  */
 let now = 0;
+// let answer2;
 export default class Chicken extends React.Component {
 
   constructor(props) {
@@ -46,6 +47,7 @@ export default class Chicken extends React.Component {
 
     this.state = {
       activeTab: [true, false, false],
+      promises : [],
       context: 0,
       eggs: null,
       feeds: null,
@@ -63,7 +65,6 @@ export default class Chicken extends React.Component {
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
     let length = new FileManager(batchInformation).calculateWeek();
     this.length = (length[1])? (length[0] + 1): length[0];
-    // console.log((batchInformation)?"batchInfo exists": "batchInfo not found");
     NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
       if(error){
         console.log(error);
@@ -71,7 +72,6 @@ export default class Chicken extends React.Component {
     });
 
     this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
-    // this.tab = this.renderTab();
   }
 
   componentWillMount() {
@@ -86,26 +86,34 @@ export default class Chicken extends React.Component {
     // this.tab = this.renderTab();
   }
 
+  handleBatches = (data) => {
+    this.state.promises.push(this.updateState(data));
+  }
+
   updateState = (data) => {
     let key = Object.keys(data)[0];
-    if(key.toLowerCase() == 'brief') return;
+    if (key.toLowerCase() == 'brief') return;
     let number = Number(key);
     let refined = JSON.parse(data[key])
-    let {eggs, feeds, casualties} = refined;
+    let { eggs, feeds, casualties } = refined;
     let eggData = {}, feedData = {}, casualtyData = {};
-    eggData.eggs = <WeeklyCard week={eggs} key={number} weekNumber={number}/>
-    feedData.feeds = <FeedCard week={feeds} key={number} weekNumber={number}/>
+    eggData.eggs = eggs;
+    feedData.feeds = feeds;
+    casualtyData.casualties = casualties;
     eggData.weekNumber = number;
     feedData.weekNumber = number;
     casualtyData.weekNumber = number;
 
-    if(!this.state.eggs) {
+    eggData.key = `${number}`;
+    feedData.key = `${number}`;
+    casualtyData.key = `${number}`;
+    if (!this.state.eggs) {
       this.setState({
         eggs: new BinaryTree(eggData),
         feeds: new BinaryTree(feedData),
         casualties: new BinaryTree(casualtyData)
       });
-    } else if(this.state.eggs instanceof BinaryTree){
+    } else if (this.state.eggs instanceof BinaryTree) {
       this.state.eggs.add(eggData);
       this.state.feeds.add(feedData);
       this.state.casualties.add(casualtyData);
@@ -117,37 +125,46 @@ export default class Chicken extends React.Component {
       now: this.state.now + 1
     })
 
-    if(this.length == this.state.now) {
-      for(let i=0; i<3; i++) {
-        let ctxt = (i==0)? "eggs":(i==1)? "feeds": "casualties";
+    if (this.length == this.state.now) {
+      for (let i = 0; i < 3; i++) {
+        let ctxt = (i == 0) ? "eggs" : (i == 1) ? "feeds" : "casualties";
         let answer = [];
-        if(ctxt == "eggs"){
+        if (ctxt == "eggs") {
           this.state.eggs.visit(answer);
           this.setState({
             eggs: answer.reverse()
           })
-        }else if(ctxt == "feeds"){
+        } else if (ctxt == "feeds") {
           this.state.feeds.visit(answer);
           this.setState({
             feeds: answer.reverse()
           })
-        } else{
+        } else {
           this.state.casualties.visit(answer);
+          let answer2 = answer;
+          let promise;
           this.setState({
-            casualties: answer.reverse()
+            casualties: new Promise((resolve, reject) => {resolve(answer2.reverse())})
           })
         }
         // console.log(answer);
       }
+      // resolve();
+    } else {
+      // resolve();
     }
   }
 
   switchToTab = (index) => {
-    console.log(index);
+    // console.log(Object.keys(index));
+    console.log(index.nativeEvent.position);
+    // for(let i in index) {
+    //   console.log(i + " is a: " +typeof index[i])
+    // }
     let activeTab = [false, false, false];
 
     for (let i = 0; i < 3; i++) {
-      if (i === index) activeTab[i] = true;
+      activeTab[i] = (i === index.nativeEvent.position);
     }
 
     this.setState({
@@ -166,32 +183,65 @@ export default class Chicken extends React.Component {
     let index = this.state.activeTab.indexOf(true);
     let { batchInformation } = this.props;
     // console.log(`This is index: ${index}`)
-
-    if (index == 0)
-      return <ChickenTab />;
-    else if (index == 1)
-      return (
-          <ProduceTab batchInformation={batchInformation} data={this.state.eggs}/>
-      );
-    else
-      return (
-          <FeedsTab batchInformation={batchInformation} data={this.state.feeds}/>
-      );
-  }
+        if(index == 0)
+          return <ProduceTab batchInformation={batchInformation} data={this.state.eggs}/>
+        else if (index == 1)
+        return (
+              <FeedsTab batchInformation={batchInformation} data={this.state.feeds}/>
+          );
+          else
+          return (
+              (this.state.casualties instanceof Promise)?<ChickenTab batchInformation={batchInformation} data={this.state.casualties}/>: <View />
+          );
+      }
 
   render() {
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
-    let tab = this.renderTab();
+    // let tab = this.renderTab();
+    // let {promises} = this.state;
+    // Promise.all(promises).then((values) => tab = this.renderTab());
     return (
       <View style={styles.chickenNav}>
         <View style={styles.header}></View>
         <View style={styles.navigationTab}>
-          {(this.state.activeTab[0]) ? <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 0)} style={styles.activeTab}><Text style={styles.tabText}>CHICKEN</Text></TouchableHighlight> : <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 0)} style={styles.dormantTab}><Text style={styles.tabText}>CHICKEN</Text></TouchableHighlight>}
-          {(this.state.activeTab[1]) ? <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 1)} style={styles.activeTab}><Text style={styles.tabText}>PRODUCE</Text></TouchableHighlight> : <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 1)} style={styles.dormantTab}><Text style={styles.tabText}>PRODUCE</Text></TouchableHighlight>}
-          {(this.state.activeTab[2]) ? <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 2)} style={styles.activeTab}><Text style={styles.tabText}>FEEDS</Text></TouchableHighlight> : <TouchableHighlight underlayColor={Theme.PARAGRAPH_COLOR} onPress={this.switchToTab.bind(this, 2)} style={styles.dormantTab}><Text style={styles.tabText}>FEEDS</Text></TouchableHighlight>}
+          <TouchableHighlight 
+            underlayColor={Theme.PARAGRAPH_COLOR} 
+            onPress={this.switchToTab.bind(this, 0)} 
+            style={[styles.dormantTab, (this.state.activeTab[0]) ? styles.activeTab : null]}
+            >
+              <Text style={styles.tabText}>PRODUCE</Text>
+          </TouchableHighlight>
+          <TouchableHighlight 
+            underlayColor={Theme.PARAGRAPH_COLOR} 
+            onPress={this.switchToTab.bind(this, 1)} 
+            style={[styles.dormantTab, (this.state.activeTab[1]) ? styles.activeTab : null]}
+            >
+              <Text style={styles.tabText}>FEEDS</Text>
+          </TouchableHighlight>
+          <TouchableHighlight 
+            underlayColor={Theme.PARAGRAPH_COLOR} 
+            onPress={this.switchToTab.bind(this, 2)} 
+            style={[styles.dormantTab, (this.state.activeTab[2]) ? styles.activeTab : null]}
+            >
+              <Text style={styles.tabText}>CHICKEN</Text>
+          </TouchableHighlight>
         </View>
 
-        {tab}
+        <ViewPager
+          style={{flex: 1, maxHeight: (Dimensions.get("window").height -150)}}
+          initialPage={0}
+          onPageSelected={this.switchToTab}
+        >
+          <View key="0">
+            <ProduceTab batchInformation={batchInformation} data={this.state.eggs} />
+          </View>
+          <View key="1">
+            <FeedsTab batchInformation={batchInformation} data={this.state.feeds} />
+          </View>
+          <View key="2">
+            <ChickenTab batchInformation={batchInformation} data={this.state.casualties}/>
+          </View>
+        </ViewPager>
 
         <View style={{
           position: "absolute",

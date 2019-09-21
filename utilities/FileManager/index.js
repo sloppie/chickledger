@@ -170,6 +170,44 @@ export default class FileManager {
         }
     }
 
+    static addCasualties(batchInformation, data){
+        let batch = new FileManager(batchInformation);
+        let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+        let currentDay = days[new Date().getDay()];
+        let weekInfo = batch.calculateWeek();
+        if (weekInfo[1]) {
+            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0] + 1), (stored)=>{
+                let newData;
+                if (stored) {
+                    newData = JSON.parse(stored);
+                    newData.casualties[currentDay] = data;
+                } else {
+                    newData = FileManager.createTemplate();
+                    newData.casualties[currentDay] = data;
+                }
+
+                newData = JSON.stringify(newData, null, 2);
+                // console.log(newData);
+                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
+            });
+        } else {
+            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0]), (stored) => {
+                let newData;
+                if (stored) {
+                    newData = JSON.parse(stored);
+                    newData.casualties[currentDay] = data;
+                } else {
+                    newData = FileManager.createTemplate();
+                    newData.casualties[currentDay] - data;
+                }
+
+                newData = JSON.stringify(newData, null, 2);
+                // console.log(newData);
+                NativeModules.FileManager.addDay(batch.context, (weekInfo[0]), newData);
+            });
+        }
+    }
+
     static checkForRecords(batchInformation, type){
         console.log(type);
         let isMounted = true;
