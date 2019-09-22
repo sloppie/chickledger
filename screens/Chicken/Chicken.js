@@ -11,6 +11,8 @@ import {
   DeviceEventEmitter,
 } from 'react-native';
 import ViewPager from '@react-native-community/viewpager';
+import { createAppContainer } from 'react-navigation';
+import { createMaterialTopTabNavigator } from 'react-navigation-tabs';
 
 import Theme from '../../theme/Theme';
 
@@ -63,13 +65,14 @@ export default class Chicken extends React.Component {
   
   componentDidMount(){
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
+    // console.log(JSON.stringify(batchInformation, null, 2));
     let length = new FileManager(batchInformation).calculateWeek();
     this.length = (length[1])? (length[0] + 1): length[0];
-    NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
-      if(error){
-        console.log(error);
-      }
-    });
+    // NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
+    //   if(error){
+    //     console.log(error);
+    //   }
+    // });
 
     this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
   }
@@ -159,17 +162,18 @@ export default class Chicken extends React.Component {
     // console.log(Object.keys(index));
     console.log(index.nativeEvent.position);
     // for(let i in index) {
-    //   console.log(i + " is a: " +typeof index[i])
-    // }
-    let activeTab = [false, false, false];
+      //   console.log(i + " is a: " +typeof index[i])
+      // }
+      let activeTab = [false, false, false];
+      let tab = index.nativeEvent.position;
 
     for (let i = 0; i < 3; i++) {
-      activeTab[i] = (i === index.nativeEvent.position);
+      activeTab[i] = (i === tab);
     }
 
     this.setState({
       activeTab,
-      context: index,
+      context: tab,
     });
     // this.tab = this.renderTab();
   }
@@ -194,15 +198,41 @@ export default class Chicken extends React.Component {
               (this.state.casualties instanceof Promise)?<ChickenTab batchInformation={batchInformation} data={this.state.casualties}/>: <View />
           );
       }
-
-  render() {
+      
+    render() {
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
+    const TopTab = createAppContainer(createMaterialTopTabNavigator(
+      {
+        Produce: {
+          screen: (props) => <ProduceTab batchInformation={batchInformation} />,
+        },
+        Feeds: {
+          screen: (props) => <FeedsTab batchInformation={batchInformation} />
+        },
+        Chicken: {
+          screen: (props) => <ChickenTab batchInformation={batchInformation}/>
+        }
+      },
+      {
+        initialRouteName: "Produce",
+        tabBarOptions: {
+          style: {
+            backgroundColor: Theme.PRIMARY_COLOR_DARK,
+          },
+        },
+        tabBarPosition: 'top',
+        swipeEnabled: true,
+        backBehavior: "order",
+        animationEnabled: true,
+      }
+    ));
+
     // let tab = this.renderTab();
     // let {promises} = this.state;
     // Promise.all(promises).then((values) => tab = this.renderTab());
     return (
       <View style={styles.chickenNav}>
-        <View style={styles.header}></View>
+        {/* <View style={styles.header}></View>
         <View style={styles.navigationTab}>
           <TouchableHighlight 
             underlayColor={Theme.PARAGRAPH_COLOR} 
@@ -252,11 +282,13 @@ export default class Chicken extends React.Component {
           display: ((this.state.context != 0) ? "flex" : "none"),
         }}>
           <FloatingActionButton context={this.state.context} batchInformation={batchInformation} navigation={this.props.navigation} />
-        </View>
+        </View> */}
+        <TopTab />
       </View>
     );
   }
 }
+
 
 let styles = StyleSheet.create({
   chickenNav: {

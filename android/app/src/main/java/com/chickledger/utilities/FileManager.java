@@ -145,6 +145,11 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
     }
   }
 
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean batchExists(String context) {
+    return new File(filesDir, "data/" + context).exists();
+  }
+
   private void makeToast(String message) {
     Toast.makeText(getReactApplicationContext(), message, Toast.LENGTH_SHORT).show();
   }

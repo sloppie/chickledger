@@ -29,7 +29,7 @@ export default class FloatingActionButton extends Component {
     return this.props.navigation.navigate(
       "AddInventory",
       {
-        context: (this.props.context == 2) ? "Feeds" : (this.props.context == 1) ? "Eggs" : "Eggs",
+        context: (this.props.context == 2) ? "Casualties" : (this.props.context == 1) ? "Feeds" : "Eggs",
         batchInformation,
       });
   }

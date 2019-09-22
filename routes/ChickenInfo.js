@@ -1,17 +1,17 @@
-import {createBottomTabNavigator, createAppContainer} from 'react-navigation';
+// import {createBottomTabNavigator, createAppContainer} from 'react-navigation';
 
-import Chicken from '../screens/Chicken/Chicken';
-import Feeds from '../screens/Feeds/Feeds';
-import Period from '../screens/Period/Period'
-import Produce from '../screens/Produce/Produce'
+// import Chicken from '../screens/Chicken/Chicken';
+// import Feeds from '../screens/Feeds/Feeds';
+// import Period from '../screens/Period/Period'
+// import Produce from '../screens/Produce/Produce'
 
-const bottomTabNavigator = createBottomTabNavigator(
-  {
-    Chicken,
-    Feeds,
-    Period,
-    Produce,
-  },
-);
+// const bottomTabNavigator = createBottomTabNavigator(
+//   {
+//     Chicken,
+//     Feeds,
+//     Period,
+//     Produce,
+//   },
+// );
 
-export default createAppContainer(bottomTabNavigator);
+// export default createAppContainer(bottomTabNavigator);

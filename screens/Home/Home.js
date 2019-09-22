@@ -28,7 +28,7 @@ export default class Home extends React.PureComponent{
   componentDidMount(){
     this._isMounted = true;
     this._isMounted && NativeModules.FileManager.fetchBatches((data)=>{
-      console.log(data);
+      // console.log(data);
       this.setState({
         batches: JSON.parse(data),
       });
@@ -37,7 +37,7 @@ export default class Home extends React.PureComponent{
     
     });
     
-    console.log(Object.keys(this.batches));
+    // console.log(Object.keys(this.batches));
   }
 
   setBatches(name, data){
@@ -78,10 +78,11 @@ export default class Home extends React.PureComponent{
     if(this.state.batches instanceof Object && this._isMounted){
       for(let i in this.state.batches){
         let batchInformation = this.state.batches[i];
-        console.log(batchInformation.name)
-        console.log("batchInformation: " + batchInformation);
+        // console.log(batchInformation.name)
+        // console.log("batchInformation: " + batchInformation);
         cards.push(
           <Card
+            key={batchInformation.name}
             navigation={this.props.navigation}
             style={styles.card}
             batchInformation={batchInformation}/>
@@ -92,8 +93,9 @@ export default class Home extends React.PureComponent{
     return cards;
   }
 
-  render(){
+  render() {
     let renderedCards = this.renderCards();
+
     return(
       <View style={styles.home}>
         {renderedCards}

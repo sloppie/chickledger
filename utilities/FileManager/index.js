@@ -233,6 +233,10 @@ export default class FileManager {
         return answer;
     }
 
+    static batchExists(name) {
+        return NativeModules.FileManager.batchExists(name);
+    }
+
     static createTemplate(){
         return {
             eggs: {},
@@ -382,10 +386,13 @@ export default class FileManager {
         NativeModules.FileManager.addDay(batch.name, 66, JSON.stringify(data, null, 2));
         data = require("./../../Batch II/67.json");
         NativeModules.FileManager.addDay(batch.name, 67, JSON.stringify(data, null, 2));
+        data = require("./../../Batch II/68.json");
+        NativeModules.FileManager.addDay(batch.name, 68, JSON.stringify(data, null, 2));
         }
 
 }
 
- let fetch = (number) => Object.create((require(`./../../Batch II/${number}.json`)));
-*/
+//  let fetch = (number) => Object.create((require(`./../../Batch II/${number}.json`)));
+
 let stringify = (number) => (number<10)? `0${number}`: `${number}`
+*/

@@ -9,8 +9,9 @@ import {
   NativeModules,
 } from 'react-native';
 
-export default class NewBatch extends Component{
+import FileManager from '../../utilities/FileManager';
 
+export default class NewBatch extends Component{
   constructor(props){
     super(props);
     this.state = {
@@ -64,7 +65,6 @@ export default class NewBatch extends Component{
    * ```
    */
   createBatch = () => {
-
     let population = {
       population: Number(this.state.population),
       date: new Date().getTime(),
@@ -74,25 +74,43 @@ export default class NewBatch extends Component{
       population: [population],
       description: this.state.description, 
     };
+    
+    if(!FileManager.batchExists(construct.name)) {
+
+      this.setState({
+        complete: JSON.stringify(construct, null, 2),
+      });
+  
+      Alert.alert(
+        'Confirm Batch Information',
+        `Batch Name: ${construct.name}\nPopulation: ${this.state.population}\nDate: ${new Date(population.date).toLocaleDateString()}`,
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          { text: 'OK', onPress: () => {NativeModules.FileManager.create(construct.name, JSON.stringify(construct, null, 2)) ; return this.props.navigation.goBack();} },
+        ],
+        { cancelable: false },
+      );
+    } else {
+      Alert.alert(
+        "Name already used",
+        `${construct.name} already used\nTry using another name.`,
+        [
+          {
+            text: "Okay",
+            onPress: () => {
+              console.log("Agreed to change");
+            },
+            style: "default",
+          },
+        ],
+      );
+    }
     // NativeModules.create(this.state.name, JSON.stringify(construct));
     // console.log(JSON.stringify(construct));
-    this.setState({
-      complete: JSON.stringify(construct, null, 2),
-    });
-
-    Alert.alert(
-      'Confirm Batch Information',
-      `Batch Name: ${construct.name}\nPopulation: ${this.state.population}\nDate: ${new Date(population.date).toLocaleDateString()}`,
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        { text: 'OK', onPress: () => {NativeModules.FileManager.create(construct.name, JSON.stringify(construct, null, 2)) ; return this.props.navigation.goBack();} },
-      ],
-      { cancelable: false },
-    );
   }
 
   render(){

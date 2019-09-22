@@ -1,4 +1,5 @@
-import {createAppContainer, createStackNavigator} from 'react-navigation';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 
 import Home from '../screens/Home/Home';
 import Events from '../screens/Events/Events'
@@ -11,7 +12,6 @@ let stackNavigator = createStackNavigator(
   {
     Home,
     Chicken,
-    Events, 
     NewBatch,
     AddInventory,
   },
