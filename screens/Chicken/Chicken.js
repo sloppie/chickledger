@@ -68,11 +68,11 @@ export default class Chicken extends React.Component {
     // console.log(JSON.stringify(batchInformation, null, 2));
     let length = new FileManager(batchInformation).calculateWeek();
     this.length = (length[1])? (length[0] + 1): length[0];
-    // NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
-    //   if(error){
-    //     console.log(error);
-    //   }
-    // });
+    NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
+      if(error){
+        console.log(error);
+      }
+    });
 
     this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
   }
