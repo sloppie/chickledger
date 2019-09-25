@@ -230,6 +230,7 @@ export default class Chicken extends React.Component {
     // let tab = this.renderTab();
     // let {promises} = this.state;
     // Promise.all(promises).then((values) => tab = this.renderTab());
+    // first change spotted!
     return (
       <View style={styles.chickenNav}>
         {/* <View style={styles.header}></View>
