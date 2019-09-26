@@ -61,16 +61,9 @@ export default class FileManager {
             let initialMonths = (y == this.initialYear)?this.initialMonth: 0;
             let lastMonth = (y == this.currentYear)? this.currentMonth: 11;
             for(let m=initialMonths; m<=lastMonth; m++){
-                // console.log("loop 2 i month: " + m + " which has: " + this.months[m][1] + " days");
-                // d should account for initial month
                 let days = (((y == this.currentYear && m==this.currentMonth))? this.currentDate: this.months[m][1]);
                 let initial = (y== this.initialYear && m==this.initialMonth)? this.initialDate: 1;
                 for(let d=initial; d<=days; d++){
-                    // if(this.days[currentDay] == "sunday"){
-                    //     currentDay = 0;
-                    // }else{
-                    //     currentDay++;
-                    // }
                     offset++;
 
                     if(!(offset % 7)){
@@ -80,49 +73,73 @@ export default class FileManager {
             } //month loop
         } //year loop
 
-        // console.log(`${weekNumber} weeks, ${offset%7}`);
         return [Math.floor(offset/7), offset%7];
     }
 
+    static choices = {
+        "casualties": "casualties",
+        "eggs": "eggs",
+        "feeds": "feeds"
+    };
+
     static addEggs(batchInformation, data) {
+        const key = FileManager.choices.eggs;
         let batch = new FileManager(batchInformation);
         let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
         let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         if (weekInfo[1]) {
-
+            let oldData = NativeModules.FileManager.fetchWeek(batch.context, key, (weekInfo[0] + 1));
+            oldData[days[currentDay]] = data;
+            let newData = JSON.parse(oldData, null, 2);
+            NativeModules.FileManager.addData(batch.context, key, (weekInfo[0] + 1), newData);
         } else {
-
+            let oldData = NativeModules.FileManager.fetchWeek(batch.context, key, (weekInfo[0]));
+            oldData[days[currentDay]] = data;
+            let newData = JSON.parse(oldData, null, 2);
+            NativeModules.FileManager.addData(batch.context, key, (weekInfo[0]), newData);
         }
     }
 
     static addFeeds(batchInformation, data){
+        const key = FileManager.choices.feeds;
         let batch = new FileManager(batchInformation);
         let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
         let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         if (weekInfo[1]) {
-
+            let oldData = NativeModules.FileManager.fetchWeek(batch.context, key, (weekInfo[0] + 1));
+            oldData[days[currentDay]] = data;
+            let newData = JSON.parse(oldData, null, 2);
+            NativeModules.FileManager.addData(batch.context, key, (weekInfo[0] + 1), newData);
         } else {
-
+            let oldData = NativeModules.FileManager.fetchWeek(batch.context, key, (weekInfo[0]));
+            oldData[days[currentDay]] = data;
+            let newData = JSON.parse(oldData, null, 2);
+            NativeModules.FileManager.addData(batch.context, key, (weekInfo[0]), newData);
         }
     }
 
     static addCasualties(batchInformation, data){
+        const key = FileManager.choices.casualties;
         let batch = new FileManager(batchInformation);
         let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
         let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         if (weekInfo[1]) {
-
+            let oldData = NativeModules.FileManager.fetchWeek(batch.context, key, (weekInfo[0] + 1));
+            oldData[days[currentDay]] = data;
+            let newData = JSON.parse(oldData, null, 2);
+            NativeModules.FileManager.addData(batch.context, key, (weekInfo[0] + 1), newData);
         } else {
-            
+            let oldData = NativeModules.FileManager.fetchWeek(batch.context, key, (weekInfo[0]));
+            oldData[days[currentDay]] = data;
+            let newData = JSON.parse(oldData, null, 2);
+            NativeModules.FileManager.addData(batch.context, key, (weekInfo[0]), newData);
         }
     }
 
     static checkForRecords(batchInformation, type){
-        console.log(type);
-        let isMounted = true;
         let batch = new FileManager(batchInformation);
         let weeks = batch.calculateWeek();
         let answer = false;
@@ -132,7 +149,6 @@ export default class FileManager {
                 let parsed = JSON.parse(response);
                 answer = (parsed[batch.days[batch.currentDay]] != null);
             }
-            
         } else {
             let response = NativeModules.FileManager.fetchWeek(batch.context, type, weeks[0]);
             if (response) {
