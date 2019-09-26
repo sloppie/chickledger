@@ -65,6 +65,11 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   }
 
   // fetching the data
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean batchExists(String context) {
+    return DirectoryCheck.checkDirectory(filesDir, context);
+  }
+
   @ReactMethod
   public void fetchBatches(Callback response) {
     String data = "";
@@ -96,6 +101,19 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   }
 
   @ReactMethod
+  public String fetchWeek(String context, String key, int weekNumber) {
+    String contents = readFile(getDir(context, weekNumber, key));
+
+    return contents;
+  }
+
+  @ReactMethod
+  public void fetchWeek(String context, String key, int weekNumber, Callback response) {
+    String contents = readFile(getDir(context, weekNumber, key)); 
+    response.invoke(contents);
+  }
+
+  @ReactMethod
   public void fetchCategory(String context, String key) {
     File file = new File(filesDir, "data/" + context);
     File[] filesFound = file.listFiles();
@@ -110,7 +128,7 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
 
   // get write directory
   private File getDir(String context, int weekNumber, String key) {
-    File dir = new File(filesDir, context + stringifyWeekNumber(weekNumber) + key);
+    File dir = new File(filesDir, context + "/" + stringifyWeekNumber(weekNumber) + "/" + key);
     if(dir.exists()) {
       return dir;
     } else {

@@ -84,51 +84,15 @@ export default class FileManager {
         return [Math.floor(offset/7), offset%7];
     }
 
-    static addWeek(batchInformation, data){
-        let batch = new FileManager(batchInformation);
-        let weekInfo = batch.calculateWeek();
-        if(weekInfo[1]){
-            NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), data);
-        }else{
-            NativeModules.FileManager.addDay(batch.context, weekInfo[0], data);
-        }
-    }
-
     static addEggs(batchInformation, data) {
         let batch = new FileManager(batchInformation);
         let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
         let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         if (weekInfo[1]) {
-            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0] + 1), (stored)=>{
-                let newData;
-                if (stored) {
-                    newData = JSON.parse(stored);
-                    newData.eggs[currentDay] = JSON.parse(data);
-                } else {
-                    newData = FileManager.createTemplate();
-                    newData.eggs[currentDay] = JSON.parse(data);
-                }
 
-                newData = JSON.stringify(newData, null, 2);
-                // console.log(newData);
-                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
-            });
         } else {
-            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0]), (stored) => {
-                let newData;
-                if (stored) {
-                    newData = JSON.parse(stored);
-                    newData.eggs[currentDay] = JSON.parse(data);
-                } else {
-                    newData = FileManager.createTemplate();
-                    newData.eggs[currentDay] - JSON.parse(data);
-                }
 
-                newData = JSON.stringify(newData, null, 2);
-                // console.log(newData);
-                NativeModules.FileManager.addDay(batch.context, (weekInfo[0]), newData);
-            });
         }
     }
 
@@ -138,35 +102,9 @@ export default class FileManager {
         let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         if (weekInfo[1]) {
-            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0] + 1), (stored)=>{
-                let newData;
-                if (stored) {
-                    newData = JSON.parse(stored);
-                    newData.feeds[currentDay] = data;
-                } else {
-                    newData = FileManager.createTemplate();
-                    newData.feeds[currentDay] = data;
-                }
 
-                newData = JSON.stringify(newData, null, 2);
-                // console.log(newData);
-                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
-            });
         } else {
-            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0]), (stored) => {
-                let newData;
-                if (stored) {
-                    newData = JSON.parse(stored);
-                    newData.feeds[currentDay] = data;
-                } else {
-                    newData = FileManager.createTemplate();
-                    newData.feeds[currentDay] - data;
-                }
 
-                newData = JSON.stringify(newData, null, 2);
-                // console.log(newData);
-                NativeModules.FileManager.addDay(batch.context, (weekInfo[0]), newData);
-            });
         }
     }
 
@@ -176,35 +114,9 @@ export default class FileManager {
         let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         if (weekInfo[1]) {
-            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0] + 1), (stored)=>{
-                let newData;
-                if (stored) {
-                    newData = JSON.parse(stored);
-                    newData.casualties[currentDay] = data;
-                } else {
-                    newData = FileManager.createTemplate();
-                    newData.casualties[currentDay] = data;
-                }
 
-                newData = JSON.stringify(newData, null, 2);
-                // console.log(newData);
-                NativeModules.FileManager.addDay(batch.context, (weekInfo[0] + 1), newData);
-            });
         } else {
-            NativeModules.FileManager.fetchWeek(batch.context, (weekInfo[0]), (stored) => {
-                let newData;
-                if (stored) {
-                    newData = JSON.parse(stored);
-                    newData.casualties[currentDay] = data;
-                } else {
-                    newData = FileManager.createTemplate();
-                    newData.casualties[currentDay] - data;
-                }
-
-                newData = JSON.stringify(newData, null, 2);
-                // console.log(newData);
-                NativeModules.FileManager.addDay(batch.context, (weekInfo[0]), newData);
-            });
+            
         }
     }
 
@@ -215,21 +127,20 @@ export default class FileManager {
         let weeks = batch.calculateWeek();
         let answer = false;
         if (weeks[1]) {
-            let response = NativeModules.FileManager.fetchWeeker(batch.context, (weeks[0] + 1));
+            let response = NativeModules.FileManager.fetchWeek(batch.context, type, (weeks[0] + 1));
             if (response) {
                 let parsed = JSON.parse(response);
-                answer = (parsed[type][batch.days[batch.currentDay]] != null);
+                answer = (parsed[batch.days[batch.currentDay]] != null);
             }
             
         } else {
-            let response = NativeModules.FileManager.fetchWeeker(batch.context, weeks[0]);
+            let response = NativeModules.FileManager.fetchWeek(batch.context, type, weeks[0]);
             if (response) {
                 let parsed = JSON.parse(response);
-                answer = (parsed[type][batch.days[batch.currentDay]] != null);
+                answer = (parsed[batch.days[batch.currentDay]] != null);
             }
         }
 
-        console.log("This is an answer " + answer);
         return answer;
     }
 
@@ -237,12 +148,6 @@ export default class FileManager {
         return NativeModules.FileManager.batchExists(name);
     }
 
-    static createTemplate(){
-        return {
-            eggs: {},
-            feeds: {},
-        }
-    }
 }
 
 /*
