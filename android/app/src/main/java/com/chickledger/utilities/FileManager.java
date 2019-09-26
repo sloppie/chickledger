@@ -23,8 +23,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
-// !TODO write a helper function that is a template for what a "batch" folder should look like
-// !TODO write a helper function for 'brief' file template maker 
 public class FileManager extends ReactContextBaseJavaModule implements DataQuery {
 
   private static final String DURATION_SHORT_KEY = "SHORT";
@@ -40,167 +38,89 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
     return "FileManager";
   }
 
+  /**NEW STRUCURE STARTS HERE */
   @ReactMethod
-  public void create(String batchName, String data) {
-    if (DirectoryCheck.checkDirectory(filesDir)) {
-      makeToast("Data Directory exists... Making ");
-      if (DirectoryCheck.makeDirectories(filesDir, batchName)) {
-        makeToast(batchName + " ready for use");
-      } else {
-        makeToast("Data does not exist... making both directories");
-        DirectoryCheck.makeDirectories(filesDir, batchName);
-        File batch = new File(filesDir, "data/" + batchName);
-        makeToast(batch.getAbsolutePath() + " ready for use at");
-      }
+  public void create(String context, Callback state) {
+    boolean check = DirectoryCheck.makeDirectories(filesDir, context);
+    if(check) {
+      createBrief(context);
+      state.invoke(true, false);
     } else {
-      makeToast("Data does not exist... making both directories");
-      DirectoryCheck.makeDirectories(filesDir, batchName);
-      // makeToast(batchName + "ready for use");
+      state.invoke(false, true);
     }
+  } 
 
-    try {
-      File brief = new File(filesDir, "data/" + batchName + "/brief");
-
-      writeFile(brief, data);
-
-      makeToast(brief.getAbsolutePath());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-  }
-
-  @ReactMethod
-  public void addWeek(String context, int weekNumber) {
-    File week = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
-
-    if (week.exists()) {
-      makeToast("Week already exists");
-    } else {
-      try {
-        week.createNewFile();
-        makeToast("Week " + weekNumber + " added");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  @ReactMethod
-  public void addDay(String context, int weekNumber, String data) {
-    File day = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
-    if (day.exists()) {
-      // rewrites the whole json string into the file with the updated key for the day
-      writeFile(day, data);
-      makeToast(weekNumber + " added to data stored");
-    } else {
-      try {
-        day.createNewFile();
-        writeFile(day, data);
-        makeToast(weekNumber + " added to data stored");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  @ReactMethod
-  public void fetchBatches(Callback onSuccess){
-    try{
-      File data = new File(filesDir, "data");
-      makeToast(data.getAbsolutePath());
-      String batches = "{";
-      int i = 1;
-      File[] foundFiles = data.listFiles();
-      int max = foundFiles.length - 1;
-      for(int x=0; x<foundFiles.length; x++){
-        if(x<max){
-          batches += "\"" + i  + "\"" + ": " + fetchBrief(foundFiles[x].getName()) + ",";
-        }else{
-          batches += "\"" + i  + "\"" + ": " + fetchBrief(foundFiles[x].getName());
-        }
-        
-        i++;
-      }
-
-      batches += "}";
-      onSuccess.invoke(batches);
-    }catch(Exception e){
-      e.printStackTrace();
-      onSuccess.invoke("{\"1\":\"No Success\"}");
-    }
-  }
-
-  
-  public String fetchBrief(String context){
-    File batch = new File(filesDir, "data/" + context + "/brief");
-    return readFile(batch);
-  }
-
-  @ReactMethod
-  public void writeBrief(String context, String data, Callback response){
+  private void createBrief(String context) {
     File brief = new File(filesDir, "data/" + context + "/brief");
-    if(brief.exists()){
-      writeFile(brief, data);
+    writeFile(brief, "");
+  }
+
+  // One method provided to the context then afterwards adds the data to the respective key of the data
+  @ReactMethod
+  public void addData(String context, String key, int weekNumber, String data) {
+    if(DirectoryCheck.addWeek(filesDir, context, weekNumber)) {
+      writeFile(getDir(context, stringify(weekNumber), key), data);
+      makeToast("data added to " + key + " store");
     }
   }
 
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  public boolean batchExists(String context) {
-    return new File(filesDir, "data/" + context).exists();
+  // fetching the data
+  @ReactMethod
+  public void fetchBatches(Callback response) {
+    String data = "";
+    File dataFolder = new File(filesDir, "data");
+    for(File batch: dataFolder.listFiles()) {
+      String brief = fetchBrief(batch.getName());
+      data += brief;
+    }
+
+    response.invoke(data);
+  }
+
+  @ReactMethod
+  public void fetchBrief(String context, Callback data) {
+    String contents = fetchBrief(context);
+    data.invoke(contents);
+  }
+
+  private String fetchBrief(String context) {
+    File brief = new File(filesDir, "data/" + context + "/brief");
+    String contents = readFile(brief);
+
+    return contents;
+  }
+
+  @ReactMethod
+  public void fetchData(String context, String key, int weekNumber, Callback data) {
+    data.invoke(readFile(getDir(context, weekNumber, key)));
+  }
+
+  @ReactMethod
+  public void fetchCategory(String context, String key) {
+    File file = new File(filesDir, "data/" + context);
+    File[] filesFound = file.listFiles();
+    for(File found: filesFound) {
+      if(found.isDirectory()) {
+        File dataFile = new File(found, key);
+        ThreadRunner tr = new ThreadRunner(dataFile, (ReactContext) getReactApplicationContext(), key, found.getName());
+        new Thread(tr).start();
+      }
+    }
+  }
+
+  // get write directory
+  private File getDir(String context, int weekNumber, String key) {
+    File dir = new File(filesDir, context + stringifyWeekNumber(weekNumber) + key);
+    if(dir.exists()) {
+      return dir;
+    } else {
+      dir.createNewFile();
+      return dir;
+    }
   }
 
   private void makeToast(String message) {
     Toast.makeText(getReactApplicationContext(), message, Toast.LENGTH_SHORT).show();
-  }
-
-  @ReactMethod
-  public void fetchWeek(String context, int weekNumber, Callback sendData) {
-    File week = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
-
-    sendData.invoke(readFile(week));
-  }
-
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  public String fetchWeeker(String context, int weekNumber){
-    File week = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
-
-    return readFile(week);
-  }
-
-  @ReactMethod
-  public void fetchBatch(String context, Callback onError) {
-    if (DirectoryCheck.checkDirectory(filesDir, context)) {
-      File contextLocation = new File(filesDir, "data/" + context);
-
-      for (File file : contextLocation.listFiles()) {
-        Thread readFile = new Thread(new ThreadRunner(file, (ReactContext) getReactApplicationContext()));
-        readFile.start();
-      }
-
-    } else {
-      onError.invoke("Error recovering files");
-    }
-  }
-
-  @ReactMethod
-  public void addToBatch(String context, int weekNumber, String data, Callback onSuccess) {
-    if (DirectoryCheck.checkDirectory(filesDir, context)) {
-      File week = new File(filesDir, "data/" + context + "/" + weekNumber);
-      if (week.exists()) {
-        writeFile(week, data);
-        // !TODO refactor the callback to display a better message
-        onSuccess.invoke("success");
-      } else {
-        try {
-          week.createNewFile();
-          writeFile(week, data);
-          onSuccess.invoke("success");
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }
   }
 
   private String stringifyWeekNumber(int weekNumber) {
@@ -262,4 +182,6 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   private void sendFile(ReactContext reactContext, String eventName, WritableMap params) {
     reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
   }
+
+
 }

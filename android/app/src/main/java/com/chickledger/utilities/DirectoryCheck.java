@@ -64,12 +64,18 @@ public class DirectoryCheck{
      * @return Boolean that shows whether the action was successfully completed
      */
     public static boolean addWeek(File context, String batchName, int weekNumber){
-        File chickenBatch = new File(context, "data/" + batchName + "/" + weekNumber);
+        File chickenBatch = new File(context, "data/" + batchName + "/" + DirectoryCheck.stringify(weekNumber));
 
         if(!chickenBatch.exists()){
             return chickenBatch.mkdir();
         }
 		return true;
     }
-	
+    
+    public static String stringify(int number) {
+        if(number < 10)
+            return "0" + number;
+        else 
+            return "" + number + "";
+    }
 }
