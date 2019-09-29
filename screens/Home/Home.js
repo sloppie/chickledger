@@ -28,7 +28,7 @@ export default class Home extends React.PureComponent{
   componentDidMount(){
     this._isMounted = true;
     this._isMounted && NativeModules.FileManager.fetchBatches((data)=>{
-      // console.log(data);
+      console.log(data);
       this.setState({
         batches: JSON.parse(data),
       });
@@ -36,6 +36,10 @@ export default class Home extends React.PureComponent{
     let store = Object.keys(this.state.batches);
     
     });
+
+    NativeModules.FileManager.fetchBrief("Patient", (data) => {
+      console.log("this is brief: " + data);
+    })
     
     // console.log(Object.keys(this.batches));
   }

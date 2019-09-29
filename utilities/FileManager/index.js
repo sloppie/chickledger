@@ -1,4 +1,5 @@
 import { NativeModules } from 'react-native';
+const batch2 = require("./../../__data__/Batcher.json");
 
 // Date format = MM/DD/YY
 
@@ -72,6 +73,7 @@ export default class FileManager {
                 } // days loop
             } //month loop
         } //year loop
+        console.log((offset/7) + " weeks," + (offset%7) + " days.")
 
         return [Math.floor(offset/7), offset%7];
     }
@@ -139,6 +141,10 @@ export default class FileManager {
         }
     }
 
+    static fetchCategory(name, key) {
+        NativeModules.FileManager.fetchCategory(name, key);
+    }
+
     static checkForRecords(batchInformation, type){
         let batch = new FileManager(batchInformation);
         let weeks = batch.calculateWeek();
@@ -164,7 +170,30 @@ export default class FileManager {
         return NativeModules.FileManager.batchExists(name);
     }
 
+    static write() {
+        const {batchInformation} = batch2;
+        console.log(JSON.stringify(batchInformation, null, 2))
+        let data = JSON.stringify(batchInformation, null, 2);
+
+        NativeModules.FileManager.create(batchInformation.name, data, (success, err) => {
+            if(success)
+                console.log("Success writing batch 2");
+            else
+                console.log("Error writing to storage");
+        });
+
+        const {batchWeeks} = batch2;
+
+        batchWeeks.forEach((element, index) => {
+            for(let i in element) {
+                let data = JSON.stringify(element[i], null, 2);
+                let weekNumber = index + 1;
+                NativeModules.FileManager.addData(batchInformation.name, i, weekNumber, data);
+            }
+        });
+    }
 }
+
 
 /*
     static write(){

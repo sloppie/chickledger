@@ -91,7 +91,7 @@ public class ThreadRunner implements Runnable {
 		if(number < 10) {
 			answer = "0" + number;
 		} else {
-			answer += number + "";
+			answer = "" + number + "";
 		}
 
 		return answer;

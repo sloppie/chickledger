@@ -90,7 +90,13 @@ export default class NewBatch extends Component{
             onPress: () => console.log('Cancel Pressed'),
             style: 'cancel',
           },
-          { text: 'OK', onPress: () => {NativeModules.FileManager.create(construct.name, JSON.stringify(construct, null, 2)) ; return this.props.navigation.goBack();} },
+          { text: 'OK', onPress: () => {
+            NativeModules.FileManager.create(construct.name, JSON.stringify(construct, null, 2), (success, err) => {
+              if(success){
+                return this.props.navigation.goBack();
+              }
+            })
+          }},
         ],
         { cancelable: false },
       );

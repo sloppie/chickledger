@@ -40,26 +40,26 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
 
   /**NEW STRUCURE STARTS HERE */
   @ReactMethod
-  public void create(String context, Callback state) {
+  public void create(String context, String data, Callback state) {
     boolean check = DirectoryCheck.makeDirectories(filesDir, context);
     if(check) {
-      createBrief(context);
+      createBrief(context, data);
       state.invoke(true, false);
     } else {
       state.invoke(false, true);
     }
   } 
 
-  private void createBrief(String context) {
+  private void createBrief(String context, String data) {
     File brief = new File(filesDir, "data/" + context + "/brief");
-    writeFile(brief, "");
+    writeFile(brief, data);
   }
 
   // One method provided to the context then afterwards adds the data to the respective key of the data
   @ReactMethod
   public void addData(String context, String key, int weekNumber, String data) {
     if(DirectoryCheck.addWeek(filesDir, context, weekNumber)) {
-      writeFile(getDir(context, stringify(weekNumber), key), data);
+      writeFile(getDir(context, weekNumber, key), data);
       makeToast("data added to " + key + " store");
     }
   }
@@ -67,28 +67,38 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   // fetching the data
   @ReactMethod(isBlockingSynchronousMethod = true)
   public boolean batchExists(String context) {
-    return DirectoryCheck.checkDirectory(filesDir, context);
+    return new File(filesDir, "data/" + context).exists();
   }
 
   @ReactMethod
   public void fetchBatches(Callback response) {
-    String data = "";
+    String data = "{";
     File dataFolder = new File(filesDir, "data");
-    for(File batch: dataFolder.listFiles()) {
-      String brief = fetchBrief(batch.getName());
+    File[] files = dataFolder.listFiles();
+    if(files != null) {
+      int length = files.length;
+      for(int i=0; i<(length - 1); i++) {
+        String brief = fetchBrif(files[i].getName());
+        data += "\"" + files[i].getName() + "\"" + ": " ;
+        data += brief + ",";
+      }
+      String brief = fetchBrif(files[(length - 1)].getName());
+      data += "\"" + files[(length - 1)].getName() + "\"" + ": " ;
       data += brief;
     }
+
+    data += "}";
 
     response.invoke(data);
   }
 
   @ReactMethod
   public void fetchBrief(String context, Callback data) {
-    String contents = fetchBrief(context);
+    String contents = fetchBrif(context);
     data.invoke(contents);
   }
 
-  private String fetchBrief(String context) {
+  private String fetchBrif(String context) {
     File brief = new File(filesDir, "data/" + context + "/brief");
     String contents = readFile(brief);
 
@@ -128,11 +138,15 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
 
   // get write directory
   private File getDir(String context, int weekNumber, String key) {
-    File dir = new File(filesDir, context + "/" + stringifyWeekNumber(weekNumber) + "/" + key);
+    File dir = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber) + "/" + key);
     if(dir.exists()) {
       return dir;
     } else {
-      dir.createNewFile();
+      try{
+        dir.createNewFile();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       return dir;
     }
   }
@@ -181,6 +195,7 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
+      makeToast(file.getAbsolutePath());
     } else {
       try {
         file.createNewFile();
@@ -190,6 +205,7 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
         fileWrite.write(data);
         fileWrite.flush();
         fileWrite.close();
+      makeToast(file.getAbsolutePath());
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
@@ -200,6 +216,4 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   private void sendFile(ReactContext reactContext, String eventName, WritableMap params) {
     reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
   }
-
-
 }

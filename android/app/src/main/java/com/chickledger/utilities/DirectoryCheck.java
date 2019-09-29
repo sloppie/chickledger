@@ -22,7 +22,7 @@ public class DirectoryCheck{
      * @return a boolean to show of the findings made
      */
     public static boolean checkDirectory(File context, String dirname){
-        return new File(context, "data/" + dirname).exists(); 
+        return new File(context, dirname).exists(); 
     }
 
     /**
@@ -46,7 +46,7 @@ public class DirectoryCheck{
                 newBatch.mkdirs();
                 return DirectoryCheck.checkDirectory(context, "data/" + batchName);
             }else{
-                return false;
+                return DirectoryCheck.checkDirectory(context, "data/" + batchName);
             }
         }else{
             File newBatch = new File(context, "data/" + batchName);

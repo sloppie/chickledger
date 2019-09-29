@@ -68,21 +68,21 @@ export default class Chicken extends React.Component {
     // console.log(JSON.stringify(batchInformation, null, 2));
     let length = new FileManager(batchInformation).calculateWeek();
     this.length = (length[1])? (length[0] + 1): length[0];
-    NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
-      if(error){
-        console.log(error);
-      }
-    });
+    // NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
+    //   if(error){
+    //     console.log(error);
+    //   }
+    // });
 
-    this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
+    // this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
   }
 
   componentWillMount() {
 
   }
 
-  componentWillUnmount(){
-    this.subscription.remove();
+  componentWillUnmount() {
+    // this.subscription.remove();
   }
 
   componentWillUpdate() {
@@ -201,6 +201,7 @@ export default class Chicken extends React.Component {
       
     render() {
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
+
     const TopTab = createAppContainer(createMaterialTopTabNavigator(
       {
         Produce: {
@@ -338,4 +339,11 @@ let styles = StyleSheet.create({
     zIndex: 2,
     alignSelf: "flex-end"
   },
-});
+});/*
+let data = NativeModules.FileManager.fetchWeeker("Batch II", 67);
+if(!data) {
+  FileManager.write();
+} else {
+  console.log(data);
+}
+*/
