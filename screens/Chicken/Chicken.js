@@ -220,11 +220,13 @@ export default class Chicken extends React.Component {
           style: {
             backgroundColor: Theme.PRIMARY_COLOR_DARK,
           },
+          scrollEnabled: true,
         },
         tabBarPosition: 'top',
         swipeEnabled: true,
         backBehavior: "order",
         animationEnabled: true,
+        lazy: true,
       }
     ));
 
