@@ -110,12 +110,15 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
     data.invoke(readFile(getDir(context, weekNumber, key)));
   }
 
+  // React native does not support overloading React Native methods
   @ReactMethod
-  public String fetchWeek(String context, String key, int weekNumber) {
+  public String fetchWeekSync(String context, String key, int weekNumber) {
     String contents = readFile(getDir(context, weekNumber, key));
+    makeToast(contents);
 
     return contents;
   }
+
 
   @ReactMethod
   public void fetchWeek(String context, String key, int weekNumber, Callback response) {
@@ -138,16 +141,27 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
 
   // get write directory
   private File getDir(String context, int weekNumber, String key) {
-    File dir = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber) + "/" + key);
+    File weekFile = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber) + "/" + key);
+    File dir = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
     if(dir.exists()) {
-      return dir;
+      if(weekFile.exists())
+        return weekFile;
+      else {
+        try{
+          weekFile.createNewFile();
+        } catch (Exception e) {
+
+        }
+        return weekFile;
+      }
     } else {
       try{
-        dir.createNewFile();
+        dir.mkdirs();
+        weekFile.createNewFile();
       } catch (Exception e) {
         e.printStackTrace();
       }
-      return dir;
+      return weekFile;
     }
   }
 

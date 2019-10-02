@@ -1,0 +1,210 @@
+import React, { Component } from 'react';
+import {
+    View,
+    StyleSheet,
+    TouchableHighlight,
+    Text,
+    ScrollView,
+    FlatList,
+    Dimensions,
+    DeviceEventEmitter,
+    NativeModules,
+} from 'react-native';
+import Icon from 'react-native-ionicons';
+
+import Theme from '../../../theme/Theme';
+import FileManager from './../../../utilities/FileManager';
+const BinaryTree = require("./../../../utilities/DataStructures/BinarySearchTrees").BinarySearchTree;
+
+let length = 0;
+
+
+export default class FeedsTab extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      items: null,
+      tree: null,
+    };
+  }
+
+  componentDidMount(){
+    NativeModules.FileManager.fetchCategory(this.props.batchInformation.name, "feeds");
+    this.subscription = DeviceEventEmitter.addListener("readfeeds", this.getData);
+  }
+
+  getData = (fetched) => {
+    let data = {};
+    let key = Object.keys(fetched)[0];
+    let number  = Number(key);
+    data.eggs = fetched[key];
+    data.key = key;
+    data.weekNumber = number;
+    if(this.state.tree) {
+      this.state.tree.add(data);
+      length++;
+      if(this.max == length) {
+        let items = [];
+        this.state.tree.visit(items);
+        this.setState({
+          items: items.reverse(),
+        });
+      }
+    } else {
+      this.setState({
+        tree: new BinaryTree(data),
+      });
+      length++;
+    }
+  }
+
+  option = () => {
+    if(this.state.items) {
+      return (
+        <FlatList 
+        data={items}
+        renderItem={({item}) => <FeedCard week={item.feeds} weekNumber={item.weekNumber}/>}/>
+      );
+    } else {
+      return (
+        <Text>Loading...</Text>
+      );
+    }
+  }
+
+  renderWeeks = () => {
+    let weeks = [];
+    for(let w=0; w<this.props.data.length; w++) {
+      weeks.push(this.props.data[w].feeds);
+    }
+    return weeks;
+  }
+  render() {
+    // let view = this.renderWeeks();
+    let {items} = this.state;
+    return (
+      <View>
+        {/* <ScrollView
+          style={{
+            maxHeight: Dimensions.get("window").height - 150,
+            // display: this.state.activeTab[2]? "flex": "none",
+          }}
+        >
+          {view}
+        </ScrollView> */}
+      </View>
+    );
+  }
+}
+
+
+/**
+ * This Component displays feeds consumeed respective to the week
+ * The object is passed into the Component through `this.props.weekNumber`
+ * 
+ * ```
+ * this.props.data = {
+ *  weekNumber: Number,
+ *  MON: Number,
+ *  ...
+ *  // Goes the same for the whole week for any day that feeds were added
+ *  ...
+ * };
+ * ```
+ */
+export class FeedCard extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      expanded: false,
+    };
+  }
+
+  componentDidMount() {
+    this.renderedDays = this.renderDays();
+  }
+
+  expand = () => {
+    this.setState({
+      expanded: !this.state.expanded,
+    });
+  }
+
+  renderDays = () => {
+    let {week} = this.props;
+    let renderedWeek = [];
+    for(let day in week) {
+      renderedWeek.push(
+        <View style={FCStyles.day} key={day}>
+          <Text style={FCStyles.dayText}>{`${day}: ${week[day].number}`}</Text>
+          <Icon style={FCStyles.editIcon} name="create" />
+        </View>
+      );
+    }
+
+    return renderedWeek;
+  }
+
+  render() {
+    return (
+      <View style={FCStyles.card}>
+        <TouchableHighlight
+          onPress={this.expand}
+          style={FCStyles.expand}
+        >
+          <View style={{ flexDirection: "row" }}>
+            <View style={FCStyles.cardInfo}>
+              <Text style={FCStyles.title}>WEEK {this.props.weekNumber}</Text>
+              <Text style={FCStyles.subtitle}>Total Feeds Consumed: {30}</Text>
+            </View>
+            <Icon name={this.state.expanded ? "arrow-dropup-circle" : "arrow-dropdown-circle"} style={FCStyles.icon} />
+          </View>
+        </TouchableHighlight>
+        {(this.state.expanded)?this.renderedDays:<View/>}
+      </View>
+    );
+  }
+}
+
+let FCStyles = StyleSheet.create({
+  card: {
+    marginTop: 8,
+    padding: 4,
+    width: (Dimensions.get("window").width - 16),
+    alignSelf: "center",
+  },
+  expand: {
+    backgroundColor: Theme.GRAY,
+  },
+  cardInfo: {
+    flex: 7,
+    paddingStart: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: Theme.HEADER_WEIGHT,
+  },
+  subtitle: {
+    fontWeight: Theme.NORMAL_WEIGHT,
+  },
+  icon: {
+    flex: 1,
+    textAlignVertical: "center",
+    textAlignVertical: "center",
+  },
+  day: {
+    padding: 8,
+    flexDirection: "row",
+    borderBottomWidth: 2,
+    borderBottomColor: Theme.GRAY,
+  },
+  dayText: {
+    flex: 4,
+  },
+  editIcon: {
+    flex: 1,
+    textAlign: "center",
+  },
+});

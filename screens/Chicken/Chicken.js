@@ -236,7 +236,7 @@ export default class Chicken extends React.Component {
     // first change spotted!
     return (
       <View style={styles.chickenNav}>
-        {/* <View style={styles.header}></View>
+        <View style={styles.header}></View>
         <View style={styles.navigationTab}>
           <TouchableHighlight 
             underlayColor={Theme.PARAGRAPH_COLOR} 
@@ -286,8 +286,8 @@ export default class Chicken extends React.Component {
           display: ((this.state.context != 0) ? "flex" : "none"),
         }}>
           <FloatingActionButton context={this.state.context} batchInformation={batchInformation} navigation={this.props.navigation} />
-        </View> */}
-        <TopTab />
+        </View>
+        {/* <TopTab /> */}
       </View>
     );
   }

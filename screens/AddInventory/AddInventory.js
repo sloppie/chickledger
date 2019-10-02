@@ -35,7 +35,7 @@ export default class AddInventory extends Component{
         let context = this.props.navigation.getParam('context', 'eggs');
         let batchInformation = this.props.navigation.getParam('batchInformation', null)
         this.setState({
-            exists: this._isMounted && FileManager.checkForRecords(batchInformation, context.toLowerCase())
+            exists: this._isMounted && FileManager.checkForRecords(batchInformation, context.toLowerCase()),
         });
     }
 
@@ -58,7 +58,7 @@ export default class AddInventory extends Component{
             )
         } else {
             let page = context.toLowerCase();
-            if(page == "eggs")
+            if(page == "eggs") 
                 return (
                     <View>
                         <Eggs batchInformation={batchInformation} navigation={navigation} />
