@@ -59,22 +59,14 @@ export default class Chicken extends React.Component {
     this.now = 0;
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextState.now == this.length || nextState.context !== this.state.context
-  }
-  
+  static navigationOptions = {
+    title: "Batch Data"
+  };
+
   componentDidMount(){
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
-    // console.log(JSON.stringify(batchInformation, null, 2));
     let length = new FileManager(batchInformation).calculateWeek();
     this.length = (length[1])? (length[0] + 1): length[0];
-    // NativeModules.FileManager.fetchBatch(batchInformation.name, (error) => {
-    //   if(error){
-    //     console.log(error);
-    //   }
-    // });
-
-    // this.subscription =  DeviceEventEmitter.addListener("readFile", this.updateState);
   }
 
   componentWillMount() {
@@ -87,75 +79,6 @@ export default class Chicken extends React.Component {
 
   componentWillUpdate() {
     // this.tab = this.renderTab();
-  }
-
-  handleBatches = (data) => {
-    this.state.promises.push(this.updateState(data));
-  }
-
-  updateState = (data) => {
-    let key = Object.keys(data)[0];
-    if (key.toLowerCase() == 'brief') return;
-    let number = Number(key);
-    let refined = JSON.parse(data[key])
-    let { eggs, feeds, casualties } = refined;
-    let eggData = {}, feedData = {}, casualtyData = {};
-    eggData.eggs = eggs;
-    feedData.feeds = feeds;
-    casualtyData.casualties = casualties;
-    eggData.weekNumber = number;
-    feedData.weekNumber = number;
-    casualtyData.weekNumber = number;
-
-    eggData.key = `${number}`;
-    feedData.key = `${number}`;
-    casualtyData.key = `${number}`;
-    if (!this.state.eggs) {
-      this.setState({
-        eggs: new BinaryTree(eggData),
-        feeds: new BinaryTree(feedData),
-        casualties: new BinaryTree(casualtyData)
-      });
-    } else if (this.state.eggs instanceof BinaryTree) {
-      this.state.eggs.add(eggData);
-      this.state.feeds.add(feedData);
-      this.state.casualties.add(casualtyData);
-    } else {
-      return;
-    }
-    // console.log(Object.keys(refined.data));
-    this.setState({
-      now: this.state.now + 1
-    })
-
-    if (this.length == this.state.now) {
-      for (let i = 0; i < 3; i++) {
-        let ctxt = (i == 0) ? "eggs" : (i == 1) ? "feeds" : "casualties";
-        let answer = [];
-        if (ctxt == "eggs") {
-          this.state.eggs.visit(answer);
-          this.setState({
-            eggs: answer.reverse()
-          })
-        } else if (ctxt == "feeds") {
-          this.state.feeds.visit(answer);
-          this.setState({
-            feeds: answer.reverse()
-          })
-        } else {
-          this.state.casualties.visit(answer);
-          let answer2 = answer;
-          let promise;
-          this.setState({
-            casualties: new Promise((resolve, reject) => {resolve(answer2.reverse())})
-          })
-        }
-        // console.log(answer);
-      }
-      // resolve();
-    } else {
-      // resolve();
-    }
   }
 
   switchToTab = (index) => {
@@ -220,23 +143,15 @@ export default class Chicken extends React.Component {
           style: {
             backgroundColor: Theme.PRIMARY_COLOR_DARK,
           },
-          scrollEnabled: true,
         },
         tabBarPosition: 'top',
         swipeEnabled: true,
-        backBehavior: "order",
         animationEnabled: true,
-        lazy: true,
       }
     ));
-
-    // let tab = this.renderTab();
-    // let {promises} = this.state;
-    // Promise.all(promises).then((values) => tab = this.renderTab());
-    // first change spotted!
     return (
       <View style={styles.chickenNav}>
-        <View style={styles.header}></View>
+        {/* <View style={styles.header}></View>
         <View style={styles.navigationTab}>
           <TouchableHighlight 
             underlayColor={Theme.PARAGRAPH_COLOR} 
@@ -286,8 +201,8 @@ export default class Chicken extends React.Component {
           display: ((this.state.context != 0) ? "flex" : "none"),
         }}>
           <FloatingActionButton context={this.state.context} batchInformation={batchInformation} navigation={this.props.navigation} />
-        </View>
-        {/* <TopTab /> */}
+        </View> */}
+        <TopTab style={styles.navBar}/>
       </View>
     );
   }
@@ -300,6 +215,8 @@ let styles = StyleSheet.create({
   },
   header: {
     height: 50,
+  },
+  navBar: {
   },
   navigationTab: {
     flexDirection: "row",

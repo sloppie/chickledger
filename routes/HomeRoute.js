@@ -2,11 +2,11 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
 import Home from '../screens/Home/Home';
-import Events from '../screens/Events/Events'
-import ChickenInfo from './ChickenInfo';
 import Chicken from '../screens/Chicken/Chicken';
 import NewBatch from '../screens/NewBatch/NewBatch';
 import AddInventory from '../screens/AddInventory/AddInventory';
+
+import Theme from '../theme/Theme'
 
 let stackNavigator = createStackNavigator(
   {
@@ -17,7 +17,14 @@ let stackNavigator = createStackNavigator(
   },
   {
     defaultNavigationOptions: {
-      header: null,
+    headerStyle: {
+      backgroundColor: Theme.PRIMARY_COLOR_DARK,
+      color: "white",
+    },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        color: "white",
+      },
     },
   },
 );

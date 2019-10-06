@@ -14,9 +14,6 @@ import Icon from 'react-native-ionicons';
 
 import Theme from '../../../theme/Theme';
 import FileManager from '../../../utilities/FileManager';
-const BinaryTree = require("./../../../utilities/DataStructures/BinarySearchTrees").BinarySearchTree;
-
-let length = 0;
 
 
 export default class ProduceTab extends Component {
@@ -25,54 +22,32 @@ export default class ProduceTab extends Component {
 
     this.rendered = false;
     this.state = {
-      tree: null,
-      items: null,
+      data: null
     };
   }
 
-  static navigationOptions = {
-    swipeEnabled: true
-  };
-
   componentDidMount() {
-    NativeModules.FileManager.fetchCategory(this.props.batchInformation.name, "eggs");
-    this.subscription = DeviceEventEmitter.addListener("readeggs", this.getData)
-    let arr = new FileManager(this.props.batchInformation).calculateWeek();
-    this.max = (arr[1])? (arr[0] + 1): arr[0];
+    NativeModules.FileManager.fetchData(this.props.batchInformation.name, "eggs", (data) => {
+      let parsedData = JSON.parse(data);
+      let weeks = [];
+      for(let i=0; i<parsedData.length; i++) {
+        if(parsedData[i]) {
+          let week = {
+            key: i.toString(),
+            weekNumber: (i + 1),
+            eggs: parsedData[i]
+          };
+          weeks.unshift(week);
+        }
+      }
+
+      this.setState({
+        data: weeks,
+      });
+    });
   }
 
   componentWillUnmount() {
-    this.subscription.remove();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.rendered;
-  }
-
-  getData = (fetched) => {
-    let data = {};
-    let key = Object.keys(fetched)[0];
-    let number  = Number(key);
-    data.eggs = fetched[key];
-    data.key = key;
-    data.weekNumber = number;
-    if(this.state.tree) {
-      this.state.tree.add(data);
-      length++;
-      if(this.max == length) {
-        let items = [];
-        this.state.tree.visit(items);
-        this.setState({
-          items: items.reverse(),
-        });
-        this.rendered = true;
-      }
-    } else {
-      this.setState({
-        tree: new BinaryTree(data),
-      });
-      length++;
-    }
   }
 
   renderWeeks = () => {
@@ -87,10 +62,10 @@ export default class ProduceTab extends Component {
   }
 
   option = () => {
-    if(this.state.items){
+    if(this.state.data) {
       return (
-        <FlatList 
-            data={this.state.items}
+        <FlatList
+            data={this.state.data}
             renderItem={({item}) => <WeeklyCard week={item.eggs} weekNumber={item.weekNumber}/>}/>
       );
     } else {
@@ -194,16 +169,20 @@ export class WeeklyCard extends Component {
   renderDays = () => {
     let {week} = this.props;
     let days = [];
-    for(let i in week) {
-      // !TODO break down object
-      days.push(
-        <View style={WCStyles.day} key={i}>
-          <Text style={WCStyles.dayText}>{i}: {week[i].normalEggs}</Text>
-          <TouchableHighlight onPress={() => { console.log("Hello") }}>
-            <Icon name="create" style={WCStyles.editIcon} />
-          </TouchableHighlight>
-        </View>
-      );
+    if(week) {
+      for(let i=0; i<week.length; i++) {
+        /**
+         *  [normalEggs, brokenEggs, smallerEggs, largerEggs] 
+         */
+        days.push(
+          <View style={WCStyles.day} key={i}>
+            <Text style={WCStyles.dayText}>{week[i][4]}</Text>
+            <TouchableHighlight onPress={() => { console.log("Hello") }}>
+              <Icon name="create" style={WCStyles.editIcon} />
+            </TouchableHighlight>
+          </View>
+        );
+      }
     }
 
     return days;
@@ -211,6 +190,10 @@ export class WeeklyCard extends Component {
 
   render() {
     let copiedStyles = Object.create(WCStyles.expanded);
+    let sum = 0;
+    this.props.week.forEach((data) => {
+      sum += data[4];
+    });
     copiedStyles.display = this.state.expanded ? "flex" : "none";
     return (
       <View style={WCStyles.card}>
@@ -218,7 +201,7 @@ export class WeeklyCard extends Component {
           <View style={WCStyles.summary}>
             <View style={WCStyles.cardInfo}>
               <Text style={WCStyles.cardTitle}>WEEK {this.props.weekNumber}</Text>
-              <Text style={WCStyles.totalTally}>Total Tally: {Math.round(Math.random() * 1500 * 7)}</Text>
+              <Text style={WCStyles.totalTally}>Total eggs produced: {sum}</Text>
             </View>
             <Icon name={this.state.expanded ? "arrow-dropup-circle" : "arrow-dropdown-circle"} style={WCStyles.expand} />
           </View>
@@ -253,8 +236,7 @@ let WCStyles = StyleSheet.create({
     fontSize: 16,
   },
   totalTally: {
-    fontSize: 18,
-    fontWeight: Theme.HEADER_WEIGHT,
+    fontWeight: Theme.NORMAL_WEIGHT,
   },
   expand: {
     flex: 1,

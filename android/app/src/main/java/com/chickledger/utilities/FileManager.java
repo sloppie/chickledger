@@ -38,7 +38,6 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
     return "FileManager";
   }
 
-  /**NEW STRUCURE STARTS HERE */
   @ReactMethod
   public void create(String context, String data, Callback state) {
     boolean check = DirectoryCheck.makeDirectories(filesDir, context);
@@ -57,11 +56,9 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
 
   // One method provided to the context then afterwards adds the data to the respective key of the data
   @ReactMethod
-  public void addData(String context, String key, int weekNumber, String data) {
-    if(DirectoryCheck.addWeek(filesDir, context, weekNumber)) {
-      writeFile(getDir(context, weekNumber, key), data);
+  public void addData(String context, String key, String data) {
+      writeFile(getDir(context, key), data);
       makeToast("data added to " + key + " store");
-    }
   }
 
   // fetching the data
@@ -106,75 +103,27 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   }
 
   @ReactMethod
-  public void fetchData(String context, String key, int weekNumber, Callback data) {
-    data.invoke(readFile(getDir(context, weekNumber, key)));
-  }
-
-  // React native does not support overloading React Native methods
-  @ReactMethod
-  public String fetchWeekSync(String context, String key, int weekNumber) {
-    String contents = readFile(getDir(context, weekNumber, key));
-    makeToast(contents);
-
-    return contents;
-  }
-
-
-  @ReactMethod
-  public void fetchWeek(String context, String key, int weekNumber, Callback response) {
-    String contents = readFile(getDir(context, weekNumber, key)); 
-    response.invoke(contents);
-  }
-
-  @ReactMethod
-  public void fetchCategory(String context, String key) {
-    File file = new File(filesDir, "data/" + context);
-    File[] filesFound = file.listFiles();
-    for(File found: filesFound) {
-      if(found.isDirectory()) {
-        File dataFile = new File(found, key);
-        ThreadRunner tr = new ThreadRunner(dataFile, (ReactContext) getReactApplicationContext(), key, found.getName());
-        new Thread(tr).start();
-      }
-    }
+  public void fetchData(String context, String key, Callback data) {
+    data.invoke(readFile(getDir(context, key)));
   }
 
   // get write directory
-  private File getDir(String context, int weekNumber, String key) {
-    File weekFile = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber) + "/" + key);
-    File dir = new File(filesDir, "data/" + context + "/" + stringifyWeekNumber(weekNumber));
-    if(dir.exists()) {
-      if(weekFile.exists())
-        return weekFile;
-      else {
-        try{
-          weekFile.createNewFile();
-        } catch (Exception e) {
+  private File getDir(String context, String key) {
+    File dataFile = new File(filesDir, "data/" + context + "/" + key);
 
-        }
-        return weekFile;
-      }
-    } else {
-      try{
-        dir.mkdirs();
-        weekFile.createNewFile();
+    if(!dataFile.exists()) {      
+      try {
+        dataFile.createNewFile();
       } catch (Exception e) {
-        e.printStackTrace();
+        // pass
       }
-      return weekFile;
     }
+    return dataFile;
   }
+
 
   private void makeToast(String message) {
     Toast.makeText(getReactApplicationContext(), message, Toast.LENGTH_SHORT).show();
-  }
-
-  private String stringifyWeekNumber(int weekNumber) {
-    if (weekNumber < 10) {
-      return "0" + weekNumber + "";
-    } else {
-      return "" + weekNumber + "";
-    }
   }
 
   // Helper function for reading files

@@ -23,84 +23,12 @@ export default class Casualties extends Component {
     this.state = {
       rendered: false,
     }
-
-    console.log(typeof this.updter);
-    // this.updater = this.updater.bind(this);
   }
 
   componentDidMount() {
-    NativeModules.FileManager.fetchCategory(this.props.batchInformation.name, "casualties");
-    this.subscription = DeviceEventEmitter.addListener("readcasualties", this.getData);
-  }
-
-  componentDidUpdate() {    let batch = this.props.batchInformation;
-    console.log("BatchInfo:\n" + JSON.stringify(batch, null, 2)); 
-    if(this.props.data instanceof Promise) this.updter();
   }
 
   componentWillUnmount() {
-    this.subscription.remove();
-  }
-
-  getData = (fetched) => {
-    let data = {};
-    let key = Object.keys(fetched)[0];
-    let number  = Number(key);
-    data.eggs = fetched[key];
-    data.key = key;
-    data.weekNumber = number;
-    if(this.state.tree) {
-      this.state.tree.add(data);
-      length++;
-      if(this.max == length) {
-        let items = [];
-        this.state.tree.visit(items);
-        this.setState({
-          items: items.reverse(),
-        });
-      }
-    } else {
-      this.setState({
-        tree: new BinaryTree(data),
-      });
-      length++;
-    }
-  }
-  
-  updter() {
-    let labels = [];
-    let dat = [];
-    this.props.data.then((data) => {
-      for(let i=0; i<10; i++){
-        labels.push(`W-${data[i].weekNumber}`);
-        let total = 0;
-        for(let d in data[i].casualties) {
-          total += data[i].casualties[d].number;
-        }
-        dat.push(total);
-      }
-      this.data = [labels.reverse(), dat.reverse()];
-      this.setState({
-        rendered: true
-      });
-    });
-
-    // let data = await this.props.data;
-
-    // data.forEach((week) => {
-    //   labels.push(`W-${week.weekNumber}`);
-    //   let total = 0;
-    //   for(let d in week.casualties) {
-    //     total += week.casualties[d];
-    //   }
-    //   dat.push(total);
-    // });
-
-    // this.data = [labels, dat];
-
-    // this.setState({
-    //   rendered: true,
-    // });
   }
 
   // componentDidUpdate() {
@@ -171,7 +99,7 @@ export default class Casualties extends Component {
             // display: this.state.activeTab[0] ? "flex" : "none",
           }}
         > */}
-        {(this.state.rendered)?this.renderGraph(): <Text style={styles.loadText}>loading graph...</Text>}
+        {/* {(this.state.rendered)?this.renderGraph(): <Text style={styles.loadText}>loading graph...</Text>} */}
         {/* </ScrollView> */}
       </View>
     );

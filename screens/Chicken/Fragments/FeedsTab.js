@@ -24,65 +24,42 @@ export default class FeedsTab extends Component {
     super(props);
 
     this.state = {
-      items: null,
-      tree: null,
+      data: null,
     };
   }
 
-  componentDidMount(){
-    NativeModules.FileManager.fetchCategory(this.props.batchInformation.name, "feeds");
-    this.subscription = DeviceEventEmitter.addListener("readfeeds", this.getData);
-  }
-
-  getData = (fetched) => {
-    let data = {};
-    let key = Object.keys(fetched)[0];
-    let number  = Number(key);
-    data.eggs = fetched[key];
-    data.key = key;
-    data.weekNumber = number;
-    if(this.state.tree) {
-      this.state.tree.add(data);
-      length++;
-      if(this.max == length) {
-        let items = [];
-        this.state.tree.visit(items);
-        this.setState({
-          items: items.reverse(),
-        });
+  componentDidMount() {
+    let {batchInformation} = this.props;
+    NativeModules.FileManager.fetchData(batchInformation.name, "feeds", (data) => {
+      let parsedData = JSON.parse(data);
+      let weekData = [];
+      for(let i=0; i<parsedData.length; i++) {
+        let week = {
+          key: i.toString(),
+          weekNumber: (i+1),
+          week: parsedData[i]
+        };
+        weekData.unshift(week);
       }
-    } else {
+
       this.setState({
-        tree: new BinaryTree(data),
+        data: weekData
       });
-      length++;
-    }
+    });
   }
 
   option = () => {
-    if(this.state.items) {
-      return (
-        <FlatList 
-        data={items}
-        renderItem={({item}) => <FeedCard week={item.feeds} weekNumber={item.weekNumber}/>}/>
-      );
-    } else {
-      return (
-        <Text>Loading...</Text>
-      );
-    }
+    return (
+      <FlatList
+        data={this.state.data}
+        renderItem={({item}) => <FeedCard week={item.week} weekNumber={item.weekNumber}/>}
+      />
+    );
   }
 
   renderWeeks = () => {
-    let weeks = [];
-    for(let w=0; w<this.props.data.length; w++) {
-      weeks.push(this.props.data[w].feeds);
-    }
-    return weeks;
   }
   render() {
-    // let view = this.renderWeeks();
-    let {items} = this.state;
     return (
       <View>
         {/* <ScrollView
@@ -93,6 +70,7 @@ export default class FeedsTab extends Component {
         >
           {view}
         </ScrollView> */}
+        {this.option()}
       </View>
     );
   }
@@ -135,10 +113,10 @@ export class FeedCard extends Component {
   renderDays = () => {
     let {week} = this.props;
     let renderedWeek = [];
-    for(let day in week) {
+    for(let i=0; i<week.length; i++) {
       renderedWeek.push(
-        <View style={FCStyles.day} key={day}>
-          <Text style={FCStyles.dayText}>{`${day}: ${week[day].number}`}</Text>
+        <View style={FCStyles.day} key={i}>
+          <Text style={FCStyles.dayText}>{`${new Date(week[i][1]).getDay()}: ${week[i][0]}`}</Text>
           <Icon style={FCStyles.editIcon} name="create" />
         </View>
       );
