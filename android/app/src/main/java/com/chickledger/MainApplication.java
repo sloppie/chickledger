@@ -37,7 +37,8 @@ public class MainApplication extends Application implements ReactApplication {
             new SvgPackage(),
             new RNDeviceInfo(),
             new RNGestureHandlerPackage(),
-            new FileManagerRegister()
+            new FileManagerRegister(),
+            new SessionsRegister()
       );
     }
 

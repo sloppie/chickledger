@@ -31,26 +31,6 @@ export default class Casualties extends Component {
   componentWillUnmount() {
   }
 
-  // componentDidUpdate() {
-  //   let labels = [];
-  //   let data = [];
-  //   if(this.props.data) {
-  //     this.props.data.forEach((week) => {
-  //       labels.push(`W-${week.weekNumber}`);
-  //       let total = 0;
-  //       for(let d in week.casualties) {
-  //         total += week.casualties[d];
-  //       }
-  //       data.push(total);
-  //     });
-  
-  //     this.data = [labels, data];
-  //     this.setState({
-  //       rendered: true
-  //     });
-  //   }
-  // }
-
   renderGraph = () => {
     return (
       <View style={styles.productionCard}>

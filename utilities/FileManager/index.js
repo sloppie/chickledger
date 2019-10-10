@@ -110,7 +110,7 @@ export default class FileManager {
         const key = FileManager.choices.eggs;
         let batch = new FileManager(batchInformation);
         let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-        let currentDay = days[new Date().getDay()];
+        // let currentDay = days[new Date().getDay()];
         let weekInfo = batch.calculateWeek();
         let parsedData = JSON.parse(data);
         let previousData;

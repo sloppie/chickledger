@@ -1,29 +1,54 @@
 import React, { Component } from 'react';
 import {
   View,
-  Text,
+  // Text,
   Dimensions,
   StyleSheet,
-  TouchableHighlight,
-  ScrollView,
-  Button,
+  // TouchableHighlight,
+  // ScrollView,
+  // Button,
   NativeModules,
-  DeviceEventEmitter,
+  // DeviceEventEmitter,
 } from 'react-native';
-import ViewPager from '@react-native-community/viewpager';
+// import ViewPager from '@react-native-community/viewpager';
 import { createAppContainer } from 'react-navigation';
 import { createMaterialTopTabNavigator } from 'react-navigation-tabs';
 
 import Theme from '../../theme/Theme';
 
 import ChickenTab from './Fragments/CasualtiesTab';
-import ProduceTab, { WeeklyCard }from './Fragments/ProduceTab';
-import FeedsTab, { FeedCard } from './Fragments/FeedsTab';
-import FloatingActionButton from './Fragments/FloatingActionButton';
+import ProduceTab from './Fragments/ProduceTab';
+import FeedsTab from './Fragments/FeedsTab';
+    const TopTab = createAppContainer(createMaterialTopTabNavigator(
+      {
+        Produce: {
+          screen: ProduceTab,
+        },
+        Feeds: {
+          screen: FeedsTab,
+        },
+        Chicken: {
+          screen: ChickenTab,
+        }
+      },
+      {
+        initialRouteName: "Produce",
+        tabBarOptions: {
+          style: {
+            backgroundColor: Theme.PRIMARY_COLOR_DARK,
+          },
+        },
+        tabBarPosition: 'top',
+        swipeEnabled: true,
+        animationEnabled: true,
+        lazy: true,
+      }
+    ));
+// import FloatingActionButton from './Fragments/FloatingActionButton';
 
-import FileManager from "./../../utilities/FileManager";
+// import FileManager from "./../../utilities/FileManager";
 
-const BinaryTree = require("./../../utilities/DataStructures/BinarySearchTrees").BinarySearchTree;
+// const BinaryTree = require("./../../utilities/DataStructures/BinarySearchTrees").BinarySearchTree;
 /**
  * !TODO: Redefine the heights from line: 203
  * !TODO export the components to a single file in the Fragments
@@ -60,95 +85,28 @@ export default class Chicken extends React.Component {
   }
 
   static navigationOptions = {
-    title: "Batch Data"
+    title: NativeModules.Sessions.getCurrentSession(),
   };
 
   componentDidMount(){
-    let batchInformation = this.props.navigation.getParam("batchInformation", {});
-    let length = new FileManager(batchInformation).calculateWeek();
-    this.length = (length[1])? (length[0] + 1): length[0];
   }
 
   componentWillMount() {
-
   }
 
   componentWillUnmount() {
-    // this.subscription.remove();
   }
 
   componentWillUpdate() {
-    // this.tab = this.renderTab();
-  }
-
-  switchToTab = (index) => {
-    // console.log(Object.keys(index));
-    console.log(index.nativeEvent.position);
-    // for(let i in index) {
-      //   console.log(i + " is a: " +typeof index[i])
-      // }
-      let activeTab = [false, false, false];
-      let tab = index.nativeEvent.position;
-
-    for (let i = 0; i < 3; i++) {
-      activeTab[i] = (i === tab);
-    }
-
-    this.setState({
-      activeTab,
-      context: tab,
-    });
-    // this.tab = this.renderTab();
-  }
-
-
-  fetchData() {
-
   }
 
   renderTab() {
-    let index = this.state.activeTab.indexOf(true);
-    let { batchInformation } = this.props;
-    // console.log(`This is index: ${index}`)
-        if(index == 0)
-          return <ProduceTab batchInformation={batchInformation} data={this.state.eggs}/>
-        else if (index == 1)
-        return (
-              <FeedsTab batchInformation={batchInformation} data={this.state.feeds}/>
-          );
-          else
-          return (
-              (this.state.casualties instanceof Promise)?<ChickenTab batchInformation={batchInformation} data={this.state.casualties}/>: <View />
-          );
-      }
+  }
       
-    render() {
+  render() {
     let batchInformation = this.props.navigation.getParam("batchInformation", {});
 
-    const TopTab = createAppContainer(createMaterialTopTabNavigator(
-      {
-        Produce: {
-          screen: (props) => <ProduceTab batchInformation={batchInformation} />,
-        },
-        Feeds: {
-          screen: (props) => <FeedsTab batchInformation={batchInformation} />
-        },
-        Chicken: {
-          screen: (props) => <ChickenTab batchInformation={batchInformation}/>
-        }
-      },
-      {
-        initialRouteName: "Produce",
-        tabBarOptions: {
-          style: {
-            backgroundColor: Theme.PRIMARY_COLOR_DARK,
-          },
-        },
-        tabBarPosition: 'top',
-        swipeEnabled: true,
-        animationEnabled: true,
-      }
-    ));
+
     return (
       <View style={styles.chickenNav}>
         {/* <View style={styles.header}></View>

@@ -4,10 +4,10 @@ import {
     StyleSheet,
     TouchableHighlight,
     Text,
-    ScrollView,
+    // ScrollView,
     FlatList,
     Dimensions,
-    DeviceEventEmitter,
+    // DeviceEventEmitter,
     NativeModules,
 } from 'react-native';
 import Icon from 'react-native-ionicons';
@@ -29,8 +29,8 @@ export default class FeedsTab extends Component {
   }
 
   componentDidMount() {
-    let {batchInformation} = this.props;
-    NativeModules.FileManager.fetchData(batchInformation.name, "feeds", (data) => {
+    let context = NativeModules.Sessions.getCurrentSession();
+    NativeModules.FileManager.fetchData(context, "feeds", (data) => {
       let parsedData = JSON.parse(data);
       let weekData = [];
       for(let i=0; i<parsedData.length; i++) {

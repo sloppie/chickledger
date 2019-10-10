@@ -17,15 +17,20 @@ export default class Card extends Component{
     super(props);
   }
 
+  goToBatch = () => {
+    NativeModules.Sessions.createSession(this.props.batchInformation.name);
+    return this.props.navigation.navigate("Chicken");
+  }
+
   render(){
     let { batchInformation } = this.props;
     let len = batchInformation.population.length - 1;
     return(
       <TouchableHighlight
-        onPress={()=>this.props.navigation.navigate("Chicken", { batchInformation })}
+        onPress={this.goToBatch}
         activeOpacity={0.6}
         style={styles.card}
-        underlayColor={Theme.PRIMARY_COLOR}>
+        underlayColor={Theme.PRIMARY_COLOR_DARK}>
         <View>
           <View style={styles.titleHolder}>
             <Text style={styles.name}> {this.props.batchInformation.name}</Text>
@@ -46,7 +51,7 @@ export default class Card extends Component{
           <View style={styles.navigate}>
               <Text style={styles.lpa}>Population: {this.props.batchInformation.population[0].population}</Text>
             <TouchableHighlight 
-              onPress={()=>this.props.navigation.navigate("Chicken", {batchInformation})}>
+              onPress={this.goToBatch}>
               <View style={{
                 flex: 1,
                 justifyContent: "center",

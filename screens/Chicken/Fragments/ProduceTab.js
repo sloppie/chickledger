@@ -4,16 +4,16 @@ import {
     StyleSheet,
     Text,
     TouchableHighlight,
-    ScrollView,
+    // ScrollView,
     FlatList,
     Dimensions,
-    DeviceEventEmitter,
+    // DeviceEventEmitter,
     NativeModules,
 } from 'react-native';
 import Icon from 'react-native-ionicons';
 
 import Theme from '../../../theme/Theme';
-import FileManager from '../../../utilities/FileManager';
+// import FileManager from '../../../utilities/FileManager';
 
 
 export default class ProduceTab extends Component {
@@ -27,7 +27,8 @@ export default class ProduceTab extends Component {
   }
 
   componentDidMount() {
-    NativeModules.FileManager.fetchData(this.props.batchInformation.name, "eggs", (data) => {
+    let context = NativeModules.Sessions.getCurrentSession();
+    NativeModules.FileManager.fetchData(context, "eggs", (data) => {
       let parsedData = JSON.parse(data);
       let weeks = [];
       for(let i=0; i<parsedData.length; i++) {
@@ -50,17 +51,6 @@ export default class ProduceTab extends Component {
   componentWillUnmount() {
   }
 
-  renderWeeks = () => {
-    let {data} = this.props;
-    let weeks = [];
-
-    for(let i=0; i<data.length; i++){
-      weeks.push(data[i].eggs);
-    }
-
-    return weeks;
-  }
-
   option = () => {
     if(this.state.data) {
       return (
@@ -76,13 +66,6 @@ export default class ProduceTab extends Component {
   render() {
     return (
       <View>
-        {/* <ScrollView
-          style={{
-            maxHeight: Dimensions.get("window").height - 150,
-            // display: this.state.activeTab[1]? "flex": "none"
-          }}>
-            {this.renderWeeks()}
-        </ScrollView> */}
         {this.option()}
       </View>
     );

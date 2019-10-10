@@ -1,17 +1,51 @@
-// import {createBottomTabNavigator, createAppContainer} from 'react-navigation';
+import React, { Component } from 'react';
+import {
+  View,
+  NativeModules,
+} from 'react-native';
 
-// import Chicken from '../screens/Chicken/Chicken';
-// import Feeds from '../screens/Feeds/Feeds';
-// import Period from '../screens/Period/Period'
-// import Produce from '../screens/Produce/Produce'
+import { createAppContainer } from 'react-navigation';
+import { createMaterialTopTabNavigator } from 'react-navigation-tabs';
 
-// const bottomTabNavigator = createBottomTabNavigator(
-//   {
-//     Chicken,
-//     Feeds,
-//     Period,
-//     Produce,
-//   },
-// );
+import ProduceTab from './../screens/Chicken/Fragments/ProduceTab';
+import FeedsTab from './../screens/Chicken/Fragments/FeedsTab';
+import ChickenTab from './../screens/Chicken/Fragments/CasualtiesTab';
 
-// export default createAppContainer(bottomTabNavigator);
+import Theme from '../theme/Theme';
+
+    const TopTab = createMaterialTopTabNavigator(
+      {
+        Produce: {
+          screen: ProduceTab,
+        },
+        Feeds: {
+          screen: FeedsTab,
+        },
+        Chicken: {
+          screen: ChickenTab,
+        }
+      },
+      {
+        initialRouteName: "Produce",
+        tabBarOptions: {
+          style: {
+            backgroundColor: Theme.PRIMARY_COLOR_DARK,
+          },
+        },
+        tabBarPosition: 'top',
+        swipeEnabled: true,
+        animationEnabled: true,
+      }
+    );
+
+
+// export default class Chicken extends Component {
+//   static navigationOptions = {
+//     title: NativeModules.Sessions.getCurrentSession(),
+//   };
+
+//   render() {
+//     return createAppContainer(TopTab); 
+//   }
+// } 
+export default createAppContainer(TopTab);

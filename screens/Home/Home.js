@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {View, 
+import {
+  View, 
   StyleSheet, 
   Dimensions,
   NativeModules,
@@ -12,6 +13,7 @@ import Card from './Fragments/Card';
 // Theme
 import Theme from './../../theme/Theme';
 
+NativeModules.Sessions.createSession("Batch II");
 
 export default class Home extends React.PureComponent{
   constructor(props){
@@ -26,20 +28,15 @@ export default class Home extends React.PureComponent{
   }
   
   componentDidMount(){
+    console.log("Current session --> ", NativeModules.Sessions.getCurrentSession());
     this._isMounted = true;
     this._isMounted && NativeModules.FileManager.fetchBatches((data)=>{
-      console.log(data);
+      // console.log(data);
       this.setState({
         batches: JSON.parse(data),
       });
-
-    let store = Object.keys(this.state.batches);
     
     });
-
-    NativeModules.FileManager.fetchBrief("Patient", (data) => {
-      console.log("this is brief: " + data);
-    })
     
     // console.log(Object.keys(this.batches));
   }
