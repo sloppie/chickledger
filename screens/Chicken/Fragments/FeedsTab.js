@@ -13,10 +13,7 @@ import {
 import Icon from 'react-native-ionicons';
 
 import Theme from '../../../theme/Theme';
-import FileManager from './../../../utilities/FileManager';
-const BinaryTree = require("./../../../utilities/DataStructures/BinarySearchTrees").BinarySearchTree;
-
-let length = 0;
+// import FileManager from './../../../utilities/FileManager';
 
 
 export default class FeedsTab extends Component {
@@ -30,22 +27,17 @@ export default class FeedsTab extends Component {
 
   componentDidMount() {
     let context = NativeModules.Sessions.getCurrentSession();
-    NativeModules.FileManager.fetchData(context, "feeds", (data) => {
+    NativeModules.FileManager.fetchList(context, "feeds", (data) => {
       let parsedData = JSON.parse(data);
-      let weekData = [];
-      for(let i=0; i<parsedData.length; i++) {
-        let week = {
-          key: i.toString(),
-          weekNumber: (i+1),
-          week: parsedData[i]
-        };
-        weekData.unshift(week);
-      }
-
       this.setState({
-        data: weekData
+        data: parsedData
       });
     });
+    // let data = NativeModules.FileManager.fetchList(context, "eggs");
+    // let parsedData = JSON.parse(data);
+    // this.setState({
+    //   data: parsedData
+    // });
   }
 
   option = () => {

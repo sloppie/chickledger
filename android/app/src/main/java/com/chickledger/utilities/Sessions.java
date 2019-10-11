@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.Callback;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -37,17 +38,18 @@ public class Sessions extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createSession(String context) {
+    public void createSession(String context, Callback onSuccess) {
         if(!dirExists()) {
             createCacheFile();
         }  
         writeFile(SESSIONS, context);
+        makeToast(context);
+        onSuccess.invoke(true);
     }
 
     public void createCacheFile() {
-        if(dirExists()) {
+        if(!dirExists()) {
             // makeToast("ALREADY\n" + SESSIONS.getAbsolutePath());
-        } else {
             try{
                 // SESSIONS = File.createTempFile("SESSIONS", null, cacheDir);
                 File newCacheFile = new File(cacheDir, "SESSIONS");
@@ -57,6 +59,7 @@ public class Sessions extends ReactContextBaseJavaModule {
             } catch(Exception ex) {
                 // pass
             }
+        } else {
         }
     }
 

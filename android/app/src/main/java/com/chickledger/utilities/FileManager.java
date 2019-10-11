@@ -41,6 +41,13 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
   @ReactMethod
   public void create(String context, String data, Callback state) {
     boolean check = DirectoryCheck.makeDirectories(filesDir, context);
+    // listView Dir made!
+    try {
+      File list = new File(filesDir, "listview/" + context);
+      list.mkdirs();
+    } catch (Exception e) {
+
+    }
     if(check) {
       createBrief(context, data);
       state.invoke(true, false);
@@ -121,7 +128,42 @@ public class FileManager extends ReactContextBaseJavaModule implements DataQuery
     return dataFile;
   }
 
-  /**CREATE LIST VIEWS FOR DATA... to allow easy access */
+  /**
+   * *******************************************************
+   * 
+   * CREATE LIST VIEWS FOR DATA... to allow easy access **** 
+   * 
+   * *******************************************************
+   */
+  @ReactMethod
+  public void createListView(String context, String type, String data) {
+    File list = new File(filesDir, "listview/" + context + "/" + type);
+    writeFile(list, data);
+  }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean listViewExists(String context, String type) {
+    boolean exists = false;
+    try {
+      File listView = new File(filesDir, "listview/" + context + "/" + type);
+      exists = listView.exists();
+    } catch (Exception e) {
+
+    }
+    return exists;
+  }
+
+  @ReactMethod
+  public void updateList(String context, String type, String data) {
+    File listView = new File(filesDir, "listview/" + context + "/" + type);
+    writeFile(listView, data);
+  }
+
+  @ReactMethod
+  public void fetchList(String context, String type, Callback data) {
+    File list = new File(filesDir, "listview/" + context + "/" + type);
+    data.invoke(readFile(list));
+  }
 
   private void makeToast(String message) {
     Toast.makeText(getReactApplicationContext(), message, Toast.LENGTH_SHORT).show();

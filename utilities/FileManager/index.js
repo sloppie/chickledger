@@ -131,7 +131,12 @@ export default class FileManager {
                 previousData[pi][6] = newDay;
             }
 
-            NativeModules.FileManager.addData("Batch II", "eggs", JSON.stringify(previousData, null, 2));
+            NativeModules.FileManager.addData(batch.context, "eggs", JSON.stringify(previousData));
+            if(NativeModules.FileManager.listViewExists(batch.context, "eggs")) {
+                NativeModules.FileManager.updateList(batch.context, "eggs", eggsToList(previousData));
+            } else {
+                NativeModules.FileManager.createListView(batch.context, "eggs", eggsToList(previousData));
+            }
         });
 
     }
@@ -187,7 +192,12 @@ export default class FileManager {
                 previousData[0].push(newData);
             }
 
-            NativeModules.FileManager.addData("Batch II", "feeds", JSON.stringify(previousData, null, 2));
+            NativeModules.FileManager.addData(batch.context, "feeds", JSON.stringify(previousData));
+            if(NativeModules.FileManager.listViewExists(batch.context, "feeds")) {
+                NativeModules.FileManager.updateList(batch.context, "feeds", feedsToList(previousData));
+            } else {
+                NativeModules.FileManager.createListView(batch.context, "feeds", feedsToList(previousData));
+            }
         });
 
     }
@@ -245,7 +255,7 @@ export default class FileManager {
                 previousData[0].push(newData);
             }
 
-            NativeModules.FileManager.addData("Batch II", "casualties", JSON.stringify(previousData, null, 2));
+            NativeModules.FileManager.addData(batch.context, "casualties", JSON.stringify(previousData));
         });
     }
 
@@ -258,12 +268,45 @@ export default class FileManager {
     }
 
     static write() {
-        NativeModules.FileManager.create(brief.name, JSON.stringify(brief, null, 2), (success, err) => {
+        NativeModules.FileManager.create(brief.name, JSON.stringify(brief), (success, err) => {
             if(success) {
                 NativeModules.FileManager.addData(brief.name, "feeds", JSON.stringify(feeds));
                 NativeModules.FileManager.addData(brief.name, "eggs", JSON.stringify(eggs));
                 NativeModules.FileManager.addData(brief.name, "casualties", JSON.stringify(casualties));
+                NativeModules.FileManager.createListView(brief.name, "eggs", eggsToList(eggs));
+                NativeModules.FileManager.createListView(brief.name, "feeds", feedsToList(feeds));
             }
         });
     }
+}
+
+function eggsToList(data) {    
+    let eggList = [];
+    
+    for(let i=0; i<data.length; i++) {
+        if (data[i]) {
+            let week = {
+                key: i.toString(),
+                weekNumber: (i + 1),
+                eggs: data[i]
+            };
+            eggList.unshift(week);
+        }
+    }
+    let answer = JSON.stringify(eggList);
+    return answer;
+}
+
+function feedsToList(data) {
+    let feedsList = [];
+    for (let i = 0; i < data.length; i++) {
+        let week = {
+            key: i.toString(),
+            weekNumber: (i + 1),
+            week: data[i]
+        };
+        feedsList.unshift(week);
+    }
+    let answer = JSON.stringify(feedsList);
+    return answer;
 }

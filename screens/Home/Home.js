@@ -13,7 +13,6 @@ import Card from './Fragments/Card';
 // Theme
 import Theme from './../../theme/Theme';
 
-NativeModules.Sessions.createSession("Batch II");
 
 export default class Home extends React.PureComponent{
   constructor(props){
@@ -23,8 +22,8 @@ export default class Home extends React.PureComponent{
       batches: {},
     };
 
-    this.batches = new Object();
-    this.setBatches = this.setBatches.bind(this);
+    // this.batches = new Object();
+    // this.setBatches = this.setBatches.bind(this);
   }
   
   componentDidMount(){

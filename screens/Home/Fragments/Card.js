@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, StyleSheet, Dimensions, TouchableHighlight} from 'react-native';
+import {View, Text, StyleSheet, Dimensions, TouchableHighlight, NativeModules} from 'react-native';
 import Icon from 'react-native-ionicons';
 
 // Theme colours
@@ -12,14 +12,22 @@ import Theme from './../../../theme/Theme';
  * LastProduceAmount: 
  * > GOTO:
  */
-export default class Card extends Component{
+export default class Card extends Component {
   constructor(props){
     super(props);
   }
 
   goToBatch = () => {
-    NativeModules.Sessions.createSession(this.props.batchInformation.name);
-    return this.props.navigation.navigate("Chicken");
+    requestAnimationFrame(() => {
+      let {name} = this.props.batchInformation;
+      true && NativeModules.Sessions.createSession(name, (state) => {
+        return this.props.navigation.navigate("Chicken");
+      });
+    });
+  }
+
+  componentDidMount() {
+
   }
 
   render(){
@@ -36,7 +44,7 @@ export default class Card extends Component{
             <Text style={styles.name}> {this.props.batchInformation.name}</Text>
             <Text style={styles.weekTitle}>{`Week 76, from ${new Date(this.props.batchInformation.population[len].date).toLocaleDateString()}`}</Text> 
           </View>
-          <View
+          {/* <View
             style={{
               flexDirection: "row",
             }}>
@@ -47,8 +55,8 @@ export default class Card extends Component{
                 textAlignVertical: "center",
                 color: Theme.PARAGRAPH_COLOR,
               }}>{" production"}</Text>
-          </View>
-          <View style={styles.navigate}>
+          </View> */}
+          {/* <View style={styles.navigate}>
               <Text style={styles.lpa}>Population: {this.props.batchInformation.population[0].population}</Text>
             <TouchableHighlight 
               onPress={this.goToBatch}>
@@ -59,7 +67,7 @@ export default class Card extends Component{
                 <Icon name="arrow-forward" style={styles.arrow} />        
               </View>
             </TouchableHighlight>
-          </View>
+          </View> */}
         </View>
       </TouchableHighlight>   
     );

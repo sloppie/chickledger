@@ -20,32 +20,27 @@ export default class ProduceTab extends Component {
   constructor(props) {
     super(props);
 
-    this.rendered = false;
     this.state = {
       data: null
     };
   }
 
   componentDidMount() {
+    console.log("Produce already mounted");
     let context = NativeModules.Sessions.getCurrentSession();
-    NativeModules.FileManager.fetchData(context, "eggs", (data) => {
-      let parsedData = JSON.parse(data);
-      let weeks = [];
-      for(let i=0; i<parsedData.length; i++) {
-        if(parsedData[i]) {
-          let week = {
-            key: i.toString(),
-            weekNumber: (i + 1),
-            eggs: parsedData[i]
-          };
-          weeks.unshift(week);
-        }
-      }
-
-      this.setState({
-        data: weeks,
-      });
-    });
+    console.log(context);
+    true && NativeModules.FileManager.fetchList(context, "eggs", (data) => {
+      // console.log(data);
+        let parsedData = JSON.parse(data);
+        this.setState({
+            data: parsedData,
+          });
+        });
+    // let data = NativeModules.FileManager.fetchList(context, "eggs");
+    // let parsedData = JSON.parse(data);
+    // this.setState({
+    //   data: parsedData
+    // });
   }
 
   componentWillUnmount() {

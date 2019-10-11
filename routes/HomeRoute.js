@@ -5,6 +5,7 @@ import { NativeModules } from 'react-native';
 
 import Home from '../screens/Home/Home';
 import Chicken from './ChickenInfo';
+// import Chicken from '../screens/Chicken/Chicken'
 import NewBatch from '../screens/NewBatch/NewBatch';
 import AddInventory from '../screens/AddInventory/AddInventory';
 
@@ -16,16 +17,20 @@ let stackNavigator = createStackNavigator(
     Chicken: {
       screen: Chicken,
       navigationOptions: {
-        title: NativeModules.Sessions.getCurrentSession()
+        title: "Batch Data"
       },
     },
     NewBatch: {
       screen: NewBatch,
-      title: "Create New Batch"
+      navigationOptions: {
+        title: "Create New Batch"
+      },
     },
     AddInventory: {
       screen: AddInventory,
-      title: "Add: " + NativeModules.Sessions.getCurrentSession(),
+      navigationOptions: {
+        title: "Add: " + NativeModules.Sessions.getCurrentSession(),
+      },
     },
   },
   {
@@ -39,7 +44,6 @@ let stackNavigator = createStackNavigator(
         color: "white",
       },
     },
-    headerMode: "screen",
   },
 );
 

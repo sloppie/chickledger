@@ -1,8 +1,3 @@
-import React, { Component } from 'react';
-import {
-  View,
-  NativeModules,
-} from 'react-native';
 
 import { createAppContainer } from 'react-navigation';
 import { createMaterialTopTabNavigator } from 'react-navigation-tabs';
@@ -35,6 +30,7 @@ import Theme from '../theme/Theme';
         tabBarPosition: 'top',
         swipeEnabled: true,
         animationEnabled: true,
+        lazy: true,
       }
     );
 
